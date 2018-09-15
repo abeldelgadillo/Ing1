@@ -25,6 +25,23 @@ I class
 
 	self error: self descripcionDeErrorDeNumerosNegativosNoSoportados .! !
 
+!I class methodsFor: 'as yet unclassified' stamp: 'A 9/15/2018 18:35:11'!
+/ unNumeroDePeano
+	(self = unNumeroDePeano) 
+		ifTrue: [^self]
+		ifFalse: [self error: self descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor 
+		].! !
+
+!I class methodsFor: 'as yet unclassified' stamp: 'A 9/15/2018 17:58:32'!
+< unNumeroDePeano
+
+	unNumeroDePeano = I ifTrue: [^false].
+	^true.! !
+
+!I class methodsFor: 'as yet unclassified' stamp: 'A 9/15/2018 18:30:38'!
+descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor
+	^'No se puede dividir por un numero mayor'.! !
+
 !I class methodsFor: 'as yet unclassified' stamp: 'A 9/15/2018 12:15:47'!
 descripcionDeErrorDeNumerosNegativosNoSoportados
 	^'No se puede restar un numero menor a un numero mayor o igual'! !
@@ -70,12 +87,33 @@ II class
 	^self prev - unNumeroDePeano prev"
 	^unNumeroDePeano esRestadoPor: self.! !
 
+!II class methodsFor: 'as yet unclassified' stamp: 'A 9/15/2018 18:01:43'!
+/ unNumeroDePeano
+
+	self < unNumeroDePeano ifTrue: [self error: self descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor].
+	
+	unNumeroDePeano = self ifTrue:[^I].
+	unNumeroDePeano = I ifTrue: [^self].
+	^(self - unNumeroDePeano /unNumeroDePeano) next! !
+
+!II class methodsFor: 'as yet unclassified' stamp: 'A 9/15/2018 18:03:23'!
+< unNumeroDePeano
+
+	self = unNumeroDePeano ifTrue: [^false].
+	self = I ifTrue: [^true].
+	unNumeroDePeano = I ifTrue: [^false].
+	^self previous < unNumeroDePeano previous.! !
+
+!II class methodsFor: 'as yet unclassified' stamp: 'A 9/15/2018 18:25:42'!
+descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor
+	^'No se puede dividir por un numero mayor'.! !
+
 !II class methodsFor: 'as yet unclassified' stamp: 'A 9/15/2018 12:06:03'!
 esRestadoPor: unNumeroDePeano
 
 	^unNumeroDePeano previous - self previous.! !
 
-!II class methodsFor: 'as yet unclassified' stamp: 'A 9/15/2018 16:50:45'!
+!II class methodsFor: 'as yet unclassified' stamp: 'A 9/15/2018 18:55:19'!
 initializeCollaboratorsFromFile
 	"Auto generated method for loading purposes - Do not modify it"
 
