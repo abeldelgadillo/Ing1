@@ -25,18 +25,16 @@ I class
 
 	self error: self descripcionDeErrorDeNumerosNegativosNoSoportados .! !
 
-!I class methodsFor: 'as yet unclassified' stamp: 'A 9/15/2018 18:35:11'!
+!I class methodsFor: 'as yet unclassified' stamp: 'A 9/16/2018 14:17:52'!
 / unNumeroDePeano
-	(self = unNumeroDePeano) 
-		ifTrue: [^self]
-		ifFalse: [self error: self descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor 
-		].! !
 
-!I class methodsFor: 'as yet unclassified' stamp: 'A 9/15/2018 17:58:32'!
+	self < unNumeroDePeano ifTrue: [self error: self descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor].
+	^self.! !
+
+!I class methodsFor: 'as yet unclassified' stamp: 'A 9/16/2018 14:18:34'!
 < unNumeroDePeano
 
-	unNumeroDePeano = I ifTrue: [^false].
-	^true.! !
+	^(unNumeroDePeano = self) not.! !
 
 !I class methodsFor: 'as yet unclassified' stamp: 'A 9/15/2018 18:30:38'!
 descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor
@@ -120,7 +118,7 @@ errorCocienteNoNatural
 
 	^'Error: cociente no natural.'! !
 
-!II class methodsFor: 'as yet unclassified' stamp: 'A 9/16/2018 13:36:04'!
+!II class methodsFor: 'as yet unclassified' stamp: 'A 9/16/2018 14:26:45'!
 initializeCollaboratorsFromFile
 	"Auto generated method for loading purposes - Do not modify it"
 
