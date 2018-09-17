@@ -11,8 +11,9 @@ DenotativeObject subclass: #I
 I class
 	instanceVariableNames: ''!
 
-!I class methodsFor: 'as yet unclassified' stamp: 'A 9/15/2018 12:18:34'!
+!I class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 14:27:16'!
 * unNumeroDePeano 
+
 	^unNumeroDePeano .! !
 
 !I class methodsFor: 'as yet unclassified' stamp: 'ARM 9/6/2018 21:44:20'!
@@ -20,19 +21,15 @@ I class
 
 	^unNumeroDePeano next! !
 
-!I class methodsFor: 'as yet unclassified' stamp: 'A 9/15/2018 12:16:13'!
+!I class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 14:27:25'!
 - unNumeroDePeano
 
 	self error: self descripcionDeErrorDeNumerosNegativosNoSoportados .! !
 
-!I class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 11:16:14'!
+!I class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 14:27:29'!
 / unNumeroDePeano
-	^unNumeroDePeano dividirAlPrimerNumeroDePeano
-"
-	(self = unNumeroDePeano) 
-		ifTrue: [^self]
-		ifFalse: [self error: self descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor ].
-"! !
+
+	^unNumeroDePeano dividirAlPrimerNumeroDePeano.! !
 
 !I class methodsFor: 'as yet unclassified' stamp: 'A 9/15/2018 18:30:38'!
 descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor
@@ -57,10 +54,15 @@ dividirPor: unNumeroDePeano conCociente: cocienteEnPeano
 
 	^cocienteEnPeano ! !
 
-!I class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 14:56:50'!
+!I class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:00:20'!
 hacerRestaPorDivision: unNumeroDePeano
 
-	self error: self descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor.! !
+	^unNumeroDePeano hacerRestaPorDivisionConUno! !
+
+!I class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:13:32'!
+hacerRestaPorDivisionConUno
+	
+	^I! !
 
 !I class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 15:46:28'!
 hacerRestaPorDivisionSinError: unNumeroDePeano
@@ -71,7 +73,7 @@ loVoyARestarA: unNumeroDePeano
 
 	^unNumeroDePeano previous.! !
 
-!I class methodsFor: 'as yet unclassified' stamp: 'ARM 9/6/2018 21:29:22'!
+!I class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 14:27:03'!
 next
 
 	^II! !
@@ -100,13 +102,14 @@ DenotativeObject subclass: #II
 II class
 	instanceVariableNames: 'next prev'!
 
-!II class methodsFor: 'as yet unclassified' stamp: 'A 9/15/2018 12:01:53'!
+!II class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 14:07:11'!
 * unNumeroDePeano
 
 	^self previous * unNumeroDePeano + unNumeroDePeano .! !
 
-!II class methodsFor: 'as yet unclassified' stamp: 'A 9/15/2018 12:09:12'!
+!II class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 14:07:18'!
 + unNumeroDePeano
+
 	^ self previous + unNumeroDePeano next.! !
 
 !II class methodsFor: 'as yet unclassified' stamp: 'matias 9/15/2018 20:16:34'!
@@ -114,39 +117,23 @@ II class
 
 	^unNumeroDePeano loVoyARestarA: self.! !
 
-!II class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 12:01:20'!
+!II class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 14:08:33'!
 / unNumeroDePeano
 
-	^unNumeroDePeano dividirA: self.
-		
-	"
-	Antigua Implementacion
-	self < unNumeroDePeano ifTrue: [self error: self descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor].
-	unNumeroDePeano = self ifTrue:[^I].
-	unNumeroDePeano = I ifTrue: [^self].
-	^(self - unNumeroDePeano /unNumeroDePeano) next
-	"! !
+	^unNumeroDePeano dividirA: self.! !
 
 !II class methodsFor: 'as yet unclassified' stamp: 'A 9/15/2018 18:25:42'!
 descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor
 	^'No se puede dividir por un numero mayor'.! !
 
-!II class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 15:29:11'!
+!II class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 14:06:50'!
 dividirA: unNumeroDePeano
 
-	self = unNumeroDePeano ifTrue: [^I].
-	^(unNumeroDePeano hacerRestaPorDivision: self) dividirPor: self  conCociente: I. 	
-"
-	unNumeroDePeano < self ifTrue: [self error: self descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor].
-	self = unNumeroDePeano ifTrue: [^I].
-	^self dividirA: (unNumeroDePeano -self) conCociente: I. 
-"! !
+	^self dividirA: (unNumeroDePeano hacerRestaPorDivision: self) conCociente: I.! !
 
-!II class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 15:44:17'!
+!II class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 14:07:02'!
 dividirA: unNumeroDePeano conCociente: cocienteEnPeano
 
-	self = unNumeroDePeano ifTrue: [^cocienteEnPeano +I].
-	"^ (unNumeroDePeano hacerRestaPorDivision: self conCociente:cocienteEnPeano) conCociente:(cocienteEnPeano +I)."
 	^(unNumeroDePeano hacerRestaPorDivisionSinError: self) dividirPor: self  conCociente: (cocienteEnPeano +I).! !
 
 !II class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 11:17:51'!
@@ -164,12 +151,17 @@ hacerRestaPorDivision: unNumeroDePeano
 
 	^unNumeroDePeano restarPorDivisionA: self.! !
 
+!II class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:05:24'!
+hacerRestaPorDivisionConUno
+	
+	^ self error: self  descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor ! !
+
 !II class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 15:55:31'!
 hacerRestaPorDivisionSinError: unNumeroDePeano
 
 	^unNumeroDePeano restarPorDivisionSinErrorA: self.! !
 
-!II class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:08:38'!
+!II class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 14:30:57'!
 initializeCollaboratorsFromFile
 	"Auto generated method for loading purposes - Do not modify it"
 
@@ -181,9 +173,9 @@ loVoyARestarA: unNumeroDePeano
 
 	^unNumeroDePeano previous - self previous.! !
 
-!II class methodsFor: 'as yet unclassified' stamp: 'ARM 9/6/2018 21:48:10'!
+!II class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 14:28:07'!
 next
-	
+
 	next ifNil:
 	[
 		next _ self cloneNamed: self name , 'I'.
@@ -191,13 +183,15 @@ next
 	].
 	^next! !
 
-!II class methodsFor: 'as yet unclassified' stamp: 'ARM 9/6/2018 21:48:32'!
+!II class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 14:28:13'!
 prev: unNumeroDePeano
+
 
 	prev _ unNumeroDePeano! !
 
-!II class methodsFor: 'as yet unclassified' stamp: 'A 9/15/2018 12:09:12'!
+!II class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 14:28:19'!
 previous
+
 	^ prev.! !
 
 !II class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 15:01:24'!
@@ -224,21 +218,21 @@ DenotativeObject subclass: #III
 III class
 	instanceVariableNames: 'next prev'!
 
-!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:52'!
+!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:48'!
 * unNumeroDePeano
 
 	^self previous * unNumeroDePeano + unNumeroDePeano .! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:52'!
+!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:48'!
 + unNumeroDePeano
 	^ self previous + unNumeroDePeano next.! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:52'!
+!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:48'!
 - unNumeroDePeano
 
 	^unNumeroDePeano loVoyARestarA: self.! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:52'!
+!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:48'!
 / unNumeroDePeano
 
 	^unNumeroDePeano dividirA: self.
@@ -251,61 +245,68 @@ III class
 	^(self - unNumeroDePeano /unNumeroDePeano) next
 	"! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:52'!
+!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:48'!
 descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor
 	^'No se puede dividir por un numero mayor'.! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:52'!
+!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:48'!
 dividirA: unNumeroDePeano
 
-	self = unNumeroDePeano ifTrue: [^I].
-	^(unNumeroDePeano hacerRestaPorDivision: self) dividirPor: self  conCociente: I. 	
+"	self = unNumeroDePeano ifTrue: [^I]."
+	"^(unNumeroDePeano hacerRestaPorDivision: self) dividirPor: self  conCociente: I."
+	^self dividirA: (unNumeroDePeano hacerRestaPorDivision: self) conCociente: I.
+	 	
 "
 	unNumeroDePeano < self ifTrue: [self error: self descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor].
 	self = unNumeroDePeano ifTrue: [^I].
 	^self dividirA: (unNumeroDePeano -self) conCociente: I. 
 "! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:52'!
+!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:48'!
 dividirA: unNumeroDePeano conCociente: cocienteEnPeano
 
-	self = unNumeroDePeano ifTrue: [^cocienteEnPeano +I].
+	"self = unNumeroDePeano ifTrue: [^cocienteEnPeano +I]."
 	"^ (unNumeroDePeano hacerRestaPorDivision: self conCociente:cocienteEnPeano) conCociente:(cocienteEnPeano +I)."
 	^(unNumeroDePeano hacerRestaPorDivisionSinError: self) dividirPor: self  conCociente: (cocienteEnPeano +I).! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:52'!
+!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:48'!
 dividirAlPrimerNumeroDePeano
 
 	^ I error: self descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:52'!
+!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:48'!
 dividirPor: unNumeroDePeano conCociente: cocienteEnPeano
 	
 	^unNumeroDePeano dividirA: self conCociente: cocienteEnPeano.! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:52'!
+!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:48'!
 hacerRestaPorDivision: unNumeroDePeano
 
 	^unNumeroDePeano restarPorDivisionA: self.! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:52'!
+!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:48'!
+hacerRestaPorDivisionConUno
+	
+	^ self error: self  descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor ! !
+
+!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:48'!
 hacerRestaPorDivisionSinError: unNumeroDePeano
 
 	^unNumeroDePeano restarPorDivisionSinErrorA: self.! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:08:38'!
+!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 14:30:57'!
 initializeCollaboratorsFromFile
 	"Auto generated method for loading purposes - Do not modify it"
 
 	next := IIII.
 	prev := II.! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:52'!
+!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:48'!
 loVoyARestarA: unNumeroDePeano
 
 	^unNumeroDePeano previous - self previous.! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:52'!
+!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:48'!
 next
 	
 	next ifNil:
@@ -315,21 +316,21 @@ next
 	].
 	^next! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:53'!
+!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:48'!
 prev: unNumeroDePeano
 
 	prev _ unNumeroDePeano! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:53'!
+!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:48'!
 previous
 	^ prev.! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:53'!
+!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:48'!
 restarPorDivisionA: unNumeroDePeano
 
 	^unNumeroDePeano previous hacerRestaPorDivision: self previous.! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:53'!
+!III class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:48'!
 restarPorDivisionSinErrorA: unNumeroDePeano
 
 	^unNumeroDePeano previous hacerRestaPorDivisionSinError: self previous.! !
@@ -348,21 +349,21 @@ DenotativeObject subclass: #IIII
 IIII class
 	instanceVariableNames: 'next prev'!
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:53'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:49'!
 * unNumeroDePeano
 
 	^self previous * unNumeroDePeano + unNumeroDePeano .! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:53'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:49'!
 + unNumeroDePeano
 	^ self previous + unNumeroDePeano next.! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:53'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:49'!
 - unNumeroDePeano
 
 	^unNumeroDePeano loVoyARestarA: self.! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:53'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:49'!
 / unNumeroDePeano
 
 	^unNumeroDePeano dividirA: self.
@@ -375,61 +376,68 @@ IIII class
 	^(self - unNumeroDePeano /unNumeroDePeano) next
 	"! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:53'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:49'!
 descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor
 	^'No se puede dividir por un numero mayor'.! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:53'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:49'!
 dividirA: unNumeroDePeano
 
-	self = unNumeroDePeano ifTrue: [^I].
-	^(unNumeroDePeano hacerRestaPorDivision: self) dividirPor: self  conCociente: I. 	
+"	self = unNumeroDePeano ifTrue: [^I]."
+	"^(unNumeroDePeano hacerRestaPorDivision: self) dividirPor: self  conCociente: I."
+	^self dividirA: (unNumeroDePeano hacerRestaPorDivision: self) conCociente: I.
+	 	
 "
 	unNumeroDePeano < self ifTrue: [self error: self descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor].
 	self = unNumeroDePeano ifTrue: [^I].
 	^self dividirA: (unNumeroDePeano -self) conCociente: I. 
 "! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:53'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:49'!
 dividirA: unNumeroDePeano conCociente: cocienteEnPeano
 
-	self = unNumeroDePeano ifTrue: [^cocienteEnPeano +I].
+	"self = unNumeroDePeano ifTrue: [^cocienteEnPeano +I]."
 	"^ (unNumeroDePeano hacerRestaPorDivision: self conCociente:cocienteEnPeano) conCociente:(cocienteEnPeano +I)."
 	^(unNumeroDePeano hacerRestaPorDivisionSinError: self) dividirPor: self  conCociente: (cocienteEnPeano +I).! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:53'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:49'!
 dividirAlPrimerNumeroDePeano
 
 	^ I error: self descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:53'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:49'!
 dividirPor: unNumeroDePeano conCociente: cocienteEnPeano
 	
 	^unNumeroDePeano dividirA: self conCociente: cocienteEnPeano.! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:53'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:49'!
 hacerRestaPorDivision: unNumeroDePeano
 
 	^unNumeroDePeano restarPorDivisionA: self.! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:53'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:49'!
+hacerRestaPorDivisionConUno
+	
+	^ self error: self  descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor ! !
+
+!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:49'!
 hacerRestaPorDivisionSinError: unNumeroDePeano
 
 	^unNumeroDePeano restarPorDivisionSinErrorA: self.! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:08:38'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 14:30:57'!
 initializeCollaboratorsFromFile
 	"Auto generated method for loading purposes - Do not modify it"
 
 	next := nil.
 	prev := III.! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:53'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:49'!
 loVoyARestarA: unNumeroDePeano
 
 	^unNumeroDePeano previous - self previous.! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:53'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:49'!
 next
 	
 	next ifNil:
@@ -439,21 +447,21 @@ next
 	].
 	^next! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:53'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:49'!
 prev: unNumeroDePeano
 
 	prev _ unNumeroDePeano! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:53'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:49'!
 previous
 	^ prev.! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:53'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:49'!
 restarPorDivisionA: unNumeroDePeano
 
 	^unNumeroDePeano previous hacerRestaPorDivision: self previous.! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/16/2018 16:03:53'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'mc 9/17/2018 01:32:49'!
 restarPorDivisionSinErrorA: unNumeroDePeano
 
 	^unNumeroDePeano previous hacerRestaPorDivisionSinError: self previous.! !
