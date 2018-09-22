@@ -21,117 +21,109 @@ TestCase subclass: #CustomerBookTest
 	poolDictionaries: ''
 	category: 'CodigoRepetido-Ejercicio'!
 
-!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/21/2018 19:39:37'!
-assertEstadoDe: aCustomerBook conClienteSuspendido: aCustomer
-
-	self assertNoHayClientesActivos: aCustomerBook.
-	self assertHayUnClienteSuspendido: aCustomerBook.
-	self assertHayUnCliente: aCustomerBook.
-	self assert: (aCustomerBook includesCustomerNamed: aCustomer).! !
-
-!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/21/2018 17:54:28'!
-assertHayUnCliente: aCustomerBook
-	self
-		assert: 1
-		equals: aCustomerBook numberOfCustomers.! !
-
-!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/21/2018 17:55:10'!
-assertHayUnClienteSuspendido: aCustomerBook
+!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/22/2018 16:53:56'!
+assertBookHasASuspendedCustomer: aCustomerBook
 	self
 		assert: 1
 		equals: aCustomerBook numberOfSuspendedCustomers.! !
 
-!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/21/2018 18:02:06'!
-assertNoHayClientes: aCustomerBook
+!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/22/2018 16:54:38'!
+assertBookHasAcustomer: aCustomerBook
+	self
+		assert: 1
+		equals: aCustomerBook numberOfCustomers.! !
 
-	self assert: 0 equals: aCustomerBook numberOfCustomers.
-! !
-
-!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/21/2018 17:56:49'!
-assertNoHayClientesActivos: aCustomerBook
+!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/22/2018 16:53:05'!
+assertBookHasNoActiveCustomers: aCustomerBook
 	self
 		assert: 0
 		equals: aCustomerBook numberOfActiveCustomers.! !
 
-!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/21/2018 18:01:18'!
-assertNoHayClientesSuspendidos: aCustomerBook
+!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/22/2018 17:08:09'!
+assertBookHasNoCustomers: aCustomerBook
+	self
+		assert: 0
+		equals: aCustomerBook numberOfCustomers.! !
 
-	self assert: 0 equals: aCustomerBook numberOfSuspendedCustomers.
-! !
+!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/22/2018 16:55:16'!
+assertBookHasNoSuspendedCustomers: aCustomerBook
+	self
+		assert: 0
+		equals: aCustomerBook numberOfSuspendedCustomers.! !
 
-!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/21/2018 19:41:01'!
-checkEstadoDeLibro: aCustomerBook conClienteSuspendido: aCustomer
-	self assertNoHayClientesActivos: aCustomerBook.
-	self assertHayUnClienteSuspendido: aCustomerBook.
-	self assertHayUnCliente: aCustomerBook.
+!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/22/2018 16:54:38'!
+checkStateOfBook: aCustomerBook withASuspendedCustomer: aCustomer
+	self assertBookHasNoActiveCustomers: aCustomerBook.
+	self assertBookHasASuspendedCustomer: aCustomerBook.
+	self assertBookHasAcustomer: aCustomerBook.
 	self assert: (aCustomerBook includesCustomerNamed: aCustomer).! !
 
-!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/21/2018 19:44:35'!
-checkEstadoDeLibro: aCustomerBook sinClientes: aCustomer
-	self assertNoHayClientesActivos: aCustomerBook.
-	self assertNoHayClientesSuspendidos: aCustomerBook.
-	self assertNoHayClientes: aCustomerBook.
+!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/22/2018 17:08:09'!
+checkStateOfBook: aCustomerBook withoutCustomers: aCustomer
+	self assertBookHasNoActiveCustomers: aCustomerBook.
+	self assertBookHasNoSuspendedCustomers: aCustomerBook.
+	self assertBookHasNoCustomers: aCustomerBook.
 	self deny: (aCustomerBook includesCustomerNamed: aCustomer).! !
 
-!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/21/2018 18:17:07'!
-deberia: unBloque ejecutarseEnMenosDe: unaCantidadDeMilisegundos
+!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/22/2018 16:46:48'!
+should: unBloque takeLessThan: unaCantidadDeMilisegundos
 	| millisecondsBeforeRunning millisecondsAfterRunning |
 	millisecondsBeforeRunning _ Time millisecondClockValue * millisecond.
 	unBloque value.
 	millisecondsAfterRunning _ Time millisecondClockValue * millisecond.
 	^ self assert: millisecondsAfterRunning - millisecondsBeforeRunning < unaCantidadDeMilisegundos.! !
 
-!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/21/2018 18:07:35'!
-esperarFallaDe: unBloqueAFallar conUnErrorDeTipo: unTipoDeError siOcurreHacer: unBloqueAVerificar
+!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/22/2018 16:47:43'!
+shouldFail: unBloqueAFallar withErrorType: unTipoDeError ifSoDo: unBloqueAVerificar
 	[
 	unBloqueAFallar value.
 	self fail ]
 		on: unTipoDeError
 		do: unBloqueAVerificar.! !
 
-!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/21/2018 18:17:07'!
+!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/22/2018 16:46:48'!
 test01AddingCustomerShouldNotTakeMoreThan50Milliseconds
 	| customerBook |
 	customerBook _ CustomerBook new.
 	self
-		deberia: [ customerBook addCustomerNamed: 'John Lennon' ]
-		ejecutarseEnMenosDe: 50 * millisecond.! !
+		should: [ customerBook addCustomerNamed: 'John Lennon' ]
+		takeLessThan: 50 * millisecond.! !
 
-!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/21/2018 18:17:07'!
+!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/22/2018 16:46:48'!
 test02RemovingCustomerShouldNotTakeMoreThan100Milliseconds
 	| customerBook paulMcCartney |
 	customerBook _ CustomerBook new.
 	paulMcCartney _ 'Paul McCartney'.
 	customerBook addCustomerNamed: paulMcCartney.
 	self
-		deberia: [ customerBook removeCustomerNamed: paulMcCartney ]
-		ejecutarseEnMenosDe: 100 * millisecond.! !
+		should: [ customerBook removeCustomerNamed: paulMcCartney ]
+		takeLessThan: 100 * millisecond.! !
 
-!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/21/2018 18:07:35'!
+!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/22/2018 16:47:43'!
 test03CanNotAddACustomerWithEmptyName
 	| customerBook |
 	customerBook _ CustomerBook new.
 	self
-		esperarFallaDe: [ customerBook addCustomerNamed: '' ]
-		conUnErrorDeTipo: Error
-		siOcurreHacer: [ :anError |
+		shouldFail: [ customerBook addCustomerNamed: '' ]
+		withErrorType: Error
+		ifSoDo: [ :anError |
 			self assert: anError messageText = CustomerBook customerCanNotBeEmptyErrorMessage.
 			self assert: customerBook isEmpty ].! !
 
-!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/21/2018 18:07:35'!
+!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/22/2018 16:47:43'!
 test04CanNotRemoveAnInvalidCustomer
 	| customerBook johnLennon |
 	customerBook _ CustomerBook new.
 	johnLennon _ 'John Lennon'.
 	customerBook addCustomerNamed: johnLennon.
 	self
-		esperarFallaDe: [ customerBook removeCustomerNamed: 'Paul McCartney' ]
-		conUnErrorDeTipo: NotFound
-		siOcurreHacer: [ :anError |
+		shouldFail: [ customerBook removeCustomerNamed: 'Paul McCartney' ]
+		withErrorType: NotFound
+		ifSoDo: [ :anError |
 			self assert: customerBook numberOfCustomers = 1.
 			self assert: (customerBook includesCustomerNamed: johnLennon) ].! !
 
-!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/21/2018 19:41:01'!
+!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/22/2018 16:48:45'!
 test05SuspendingACustomerShouldNotRemoveItFromCustomerBook
 	| customerBook paulMcCartney |
 	customerBook _ CustomerBook new.
@@ -139,10 +131,10 @@ test05SuspendingACustomerShouldNotRemoveItFromCustomerBook
 	customerBook addCustomerNamed: paulMcCartney.
 	customerBook suspendCustomerNamed: paulMcCartney.
 	self
-		checkEstadoDeLibro: customerBook
-		conClienteSuspendido: paulMcCartney.! !
+		checkStateOfBook: customerBook
+		withASuspendedCustomer: paulMcCartney.! !
 
-!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/21/2018 19:44:35'!
+!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/22/2018 16:49:27'!
 test06RemovingASuspendedCustomerShouldRemoveItFromCustomerBook
 	| customerBook paulMcCartney |
 	customerBook _ CustomerBook new.
@@ -151,23 +143,23 @@ test06RemovingASuspendedCustomerShouldRemoveItFromCustomerBook
 	customerBook suspendCustomerNamed: paulMcCartney.
 	customerBook removeCustomerNamed: paulMcCartney.
 	self
-		checkEstadoDeLibro: customerBook
-		sinClientes: paulMcCartney.! !
+		checkStateOfBook: customerBook
+		withoutCustomers: paulMcCartney.! !
 
-!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/21/2018 18:07:35'!
+!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/22/2018 16:47:43'!
 test07CanNotSuspendAnInvalidCustomer
 	| customerBook johnLennon |
 	customerBook _ CustomerBook new.
 	johnLennon _ 'John Lennon'.
 	customerBook addCustomerNamed: johnLennon.
 	self
-		esperarFallaDe: [ customerBook suspendCustomerNamed: 'Paul McCartney' ]
-		conUnErrorDeTipo: CantSuspend
-		siOcurreHacer: [ :anError |
+		shouldFail: [ customerBook suspendCustomerNamed: 'Paul McCartney' ]
+		withErrorType: CantSuspend
+		ifSoDo: [ :anError |
 			self assert: customerBook numberOfCustomers = 1.
 			self assert: (customerBook includesCustomerNamed: johnLennon) ].! !
 
-!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/21/2018 18:07:35'!
+!CustomerBookTest methodsFor: 'testing' stamp: 'A 9/22/2018 16:47:43'!
 test08CanNotSuspendAnAlreadySuspendedCustomer
 	| customerBook johnLennon |
 	customerBook _ CustomerBook new.
@@ -175,9 +167,9 @@ test08CanNotSuspendAnAlreadySuspendedCustomer
 	customerBook addCustomerNamed: johnLennon.
 	customerBook suspendCustomerNamed: johnLennon.
 	self
-		esperarFallaDe: [ customerBook suspendCustomerNamed: johnLennon ]
-		conUnErrorDeTipo: CantSuspend
-		siOcurreHacer: [ :anError |
+		shouldFail: [ customerBook suspendCustomerNamed: johnLennon ]
+		withErrorType: CantSuspend
+		ifSoDo: [ :anError |
 			self assert: customerBook numberOfCustomers = 1.
 			self assert: (customerBook includesCustomerNamed: johnLennon) ].! !
 
