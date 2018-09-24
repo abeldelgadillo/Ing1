@@ -72,14 +72,15 @@ test03CanNotAddACustomerWithEmptyName
 			self assert: anError messageText = CustomerBook customerCanNotBeEmptyErrorMessage.
 			self assert: customerBook isEmpty ].! !
 
-!CustomerBookTest methodsFor: 'testing' stamp: 'mc 9/23/2018 22:00:48'!
+!CustomerBookTest methodsFor: 'testing' stamp: 'mc 9/24/2018 00:00:29'!
 test04CanNotRemoveAnInvalidCustomer
-	customerBook addCustomerNamed: 'John Lennon'.
+	|johnLennon|
+	johnLennon _ self addCoustomerAndReturnName: 'John Lennon'.
 	
 	self
 		shouldFail: [ customerBook removeCustomerNamed: 'Paul McCartney' ]
 		withErrorType: NotFound
-		ifSoDo: self assertOnlyCustomerIsJohnLennon.! !
+		ifSoDo: [self assertOnlyCustomerIs:johnLennon ].! !
 
 !CustomerBookTest methodsFor: 'testing' stamp: 'mc 9/23/2018 21:22:24'!
 test05SuspendingACustomerShouldNotRemoveItFromCustomerBook
@@ -98,18 +99,18 @@ test06RemovingASuspendedCustomerShouldRemoveItFromCustomerBook
 	
 	self shouldCustomer: paulMcCartney beRemovedFromCustomerBook: customerBook .! !
 
-!CustomerBookTest methodsFor: 'testing' stamp: 'mc 9/23/2018 21:59:30'!
+!CustomerBookTest methodsFor: 'testing' stamp: 'mc 9/23/2018 23:59:27'!
 test07CanNotSuspendAnInvalidCustomer
-
+	|johnLennon|
 	
-	customerBook addCustomerNamed: 'John Lennon'.
+	johnLennon _ self addCoustomerAndReturnName: 'John Lennon'.
 
 	self
 		shouldFail: [ customerBook suspendCustomerNamed: 'Paul McCartney' ]		
 		withErrorType: CantSuspend
-		ifSoDo: self assertOnlyCustomerIsJohnLennon.! !
+		ifSoDo: [ self assertOnlyCustomerIs:johnLennon].! !
 
-!CustomerBookTest methodsFor: 'testing' stamp: 'mc 9/23/2018 21:58:02'!
+!CustomerBookTest methodsFor: 'testing' stamp: 'mc 9/23/2018 23:57:44'!
 test08CanNotSuspendAnAlreadySuspendedCustomer
 	| johnLennon |
 	
@@ -118,7 +119,7 @@ test08CanNotSuspendAnAlreadySuspendedCustomer
 	self
 		shouldFail: [ customerBook suspendCustomerNamed: johnLennon ]
 		withErrorType: CantSuspend
-		ifSoDo: self assertOnlyCustomerIsJohnLennon.! !
+		ifSoDo: [self assertOnlyCustomerIs:johnLennon].! !
 
 
 !CustomerBookTest methodsFor: 'assertions' stamp: 'A 9/22/2018 16:53:56'!
@@ -151,10 +152,10 @@ assertBookHasNoSuspendedCustomers: aCustomerBook
 		assert: 0
 		equals: aCustomerBook numberOfSuspendedCustomers.! !
 
-!CustomerBookTest methodsFor: 'assertions' stamp: 'mc 9/23/2018 21:57:41'!
-assertOnlyCustomerIsJohnLennon
+!CustomerBookTest methodsFor: 'assertions' stamp: 'mc 9/23/2018 23:56:30'!
+assertOnlyCustomerIs: aName
 			self assert: customerBook numberOfCustomers = 1.
-			self assert: (customerBook includesCustomerNamed: 'John Lennon').! !
+			self assert: (customerBook includesCustomerNamed: aName).! !
 
 !CustomerBookTest methodsFor: 'assertions' stamp: 'A 9/22/2018 16:46:48'!
 should: unBloque takeLessThan: unaCantidadDeMilisegundos
