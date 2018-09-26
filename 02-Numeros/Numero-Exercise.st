@@ -363,22 +363,15 @@ Numero subclass: #Entero
 	poolDictionaries: ''
 	category: 'Numero-Exercise'!
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'A 9/26/2018 15:53:44'!
+!Entero methodsFor: 'arithmetic operations' stamp: 'mc 9/26/2018 20:06:21'!
 * aMultiplier 
-	
-	(aMultiplier class = self class) 
-	ifTrue: 
-		[^self class with: value * aMultiplier integerValue.]
-	ifFalse: 
-		[^self* aMultiplier numerator / aMultiplier denominator].
-	! !
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'A 9/26/2018 15:46:35'!
+	^aMultiplier  multiplyAnEntero: self.! !
+
+!Entero methodsFor: 'arithmetic operations' stamp: 'mc 9/26/2018 19:59:45'!
 + anAdder 
-	
-	(anAdder class = self class) ifTrue: [^self class with: value + anAdder integerValue]
-	ifFalse: [^self * anAdder denominator + anAdder numerator / anAdder denominator].
-! !
+
+	^anAdder addToAnEntero: self.! !
 
 !Entero methodsFor: 'arithmetic operations' stamp: 'mc 9/26/2018 16:58:10'!
 - aSubtrahend 
@@ -399,7 +392,27 @@ Numero subclass: #Entero
 	
 	^self class with: value // aDivisor integerValue! !
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'HAW 9/24/2018 08:47:50'!
+!Entero methodsFor: 'arithmetic operations' stamp: 'mc 9/26/2018 19:54:05'!
+addToAFraction: aFraction
+
+	| newNumerator newDenominator |
+	
+	newNumerator := self * aFraction denominator + aFraction numerator .
+	newDenominator := aFraction denominator .
+	
+	^ newNumerator / newDenominator! !
+
+!Entero methodsFor: 'arithmetic operations' stamp: 'mc 9/26/2018 19:44:00'!
+addToAnEntero: anEntero
+
+"
+ 	this will  return an SmallInteger and when it operates with other Numero will raise an exception
+	
+	^self integerValue + anEntero integerValue
+"
+	^ self class with: value + anEntero integerValue.! !
+
+!Entero methodsFor: 'arithmetic operations' stamp: 'mc 9/26/2018 20:00:31'!
 fibonacci
 
 	| one two |
@@ -410,13 +423,22 @@ fibonacci
 	self isNegative ifTrue: [self error: Entero negativeFibonacciErrorDescription ].	
 	(self isZero or: [self isOne]) ifTrue: [^one].
 	
-	^ (self - one) fibonacci + (self - two) fibonacci
-		! !
+	^ (self - one) fibonacci + (self - two) fibonacci! !
 
 !Entero methodsFor: 'arithmetic operations' stamp: 'HernanWilkinson 5/7/2016 21:00'!
 greatestCommonDivisorWith: anEntero 
 	
 	^self class with: (value gcd: anEntero integerValue)! !
+
+!Entero methodsFor: 'arithmetic operations' stamp: 'mc 9/26/2018 20:13:30'!
+multiplyAFraction: aFraction
+
+	^ aFraction numerator * self / aFraction denominator.! !
+
+!Entero methodsFor: 'arithmetic operations' stamp: 'mc 9/26/2018 20:08:29'!
+multiplyAnEntero: anEntero
+
+	^ self class with: value * anEntero integerValue.! !
 
 
 !Entero methodsFor: 'comparing' stamp: 'HernanWilkinson 5/7/2016 21:01'!
@@ -496,30 +518,14 @@ Numero subclass: #Fraccion
 	poolDictionaries: ''
 	category: 'Numero-Exercise'!
 
-!Fraccion methodsFor: 'arithmetic operations' stamp: 'A 9/26/2018 15:55:23'!
+!Fraccion methodsFor: 'arithmetic operations' stamp: 'mc 9/26/2018 20:11:35'!
 * aMultiplier 
-	
-	(aMultiplier class = self class) 
-	ifTrue: 
-		[^(numerator * aMultiplier numerator) / (denominator * aMultiplier denominator)]
-	ifFalse:
-		[^numerator *aMultiplier / denominator ]
-	! !
 
-!Fraccion methodsFor: 'arithmetic operations' stamp: 'A 9/26/2018 15:50:11'!
+	^ aMultiplier multiplyAFraction: self.! !
+
+!Fraccion methodsFor: 'arithmetic operations' stamp: 'mc 9/26/2018 20:13:54'!
 + anAdder 
-	
-	| newNumerator newDenominator |
-	
-	(anAdder class = self class) ifTrue: 
-		[newNumerator := (numerator * anAdder denominator) + (denominator * anAdder numerator).
-		newDenominator := denominator * anAdder denominator] 
-	ifFalse: [
-		newNumerator := anAdder * denominator + numerator .
-		newDenominator := denominator .
-	].
-	
-	^newNumerator / newDenominator ! !
+	^anAdder  addToAFraction: self.! !
 
 !Fraccion methodsFor: 'arithmetic operations' stamp: 'mc 9/26/2018 17:58:33'!
 - aSubtrahend 
@@ -539,6 +545,21 @@ Numero subclass: #Fraccion
 	(aDivisor class = self class) ifTrue: [^(numerator * aDivisor denominator) / (denominator * aDivisor numerator)]
 	ifFalse: [^numerator/(denominator* aDivisor) ].! !
 
+!Fraccion methodsFor: 'arithmetic operations' stamp: 'mc 9/26/2018 19:57:11'!
+addToAFraction: aFraction
+
+	| newNumerator newDenominator |
+	
+	newNumerator := (aFraction numerator * self denominator) + (aFraction denominator * self numerator).
+	newDenominator := aFraction denominator * self denominator.
+	
+	^newNumerator /newDenominator ! !
+
+!Fraccion methodsFor: 'arithmetic operations' stamp: 'mc 9/26/2018 20:12:31'!
+multiplyAFraction: aFraction
+
+	^( numerator * aFraction numerator) / (denominator * aFraction denominator).! !
+
 
 !Fraccion methodsFor: 'comparing' stamp: 'HernanWilkinson 5/7/2016 20:42'!
 = anObject
@@ -556,6 +577,11 @@ denominator
 
 	^ denominator! !
 
+!Fraccion methodsFor: 'accessing' stamp: 'mc 9/26/2018 20:09:43'!
+multiplyAnEntero: anEntero
+
+	^ anEntero * self numerator / self denominator.! !
+
 !Fraccion methodsFor: 'accessing' stamp: 'HernanWilkinson 5/7/2016 21:56'!
 numerator
 
@@ -572,6 +598,11 @@ initializeWith: aNumerator over: aDenominator
 	numerator := aNumerator.
 	denominator := aDenominator ! !
 
+
+!Fraccion methodsFor: 'testing' stamp: 'mc 9/26/2018 19:18:57'!
+addToAnEntero: anEntero
+
+	^anEntero * self denominator + self numerator / self denominator! !
 
 !Fraccion methodsFor: 'testing' stamp: 'NR 9/23/2018 23:41:38'!
 isNegative
