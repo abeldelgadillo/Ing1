@@ -219,7 +219,7 @@ test34SubstractingAHigherValueToANumberReturnsANegativeNumber
 
 	self assert: one - fiveHalfs equals: negativeThreeHalfs.! !
 
-!NumeroTest methodsFor: 'tests' stamp: 'NR 9/23/2018 23:49:23'!
+!NumeroTest methodsFor: 'tests' stamp: 'mc 9/30/2018 13:59:21'!
 test35FibonacciZeroIsOne
 
 	self assert: zero fibonacci equals: one! !
@@ -229,7 +229,7 @@ test36FibonacciOneIsOne
 
 	self assert: one fibonacci equals: one! !
 
-!NumeroTest methodsFor: 'tests' stamp: 'NR 9/23/2018 23:49:39'!
+!NumeroTest methodsFor: 'tests' stamp: 'mc 9/30/2018 13:58:32'!
 test37FibonacciEnteroReturnsAddingPreviousTwoFibonacciEnteros
 
 	self assert: four fibonacci equals: five.
@@ -418,18 +418,10 @@ divideAnEntero: anEntero
 
 	^Fraccion with: anEntero over: self.! !
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'mc 9/26/2018 20:00:31'!
+!Entero methodsFor: 'arithmetic operations' stamp: 'mc 9/30/2018 14:12:08'!
 fibonacci
 
-	| one two |
-	
-	one := Entero with: 1.
-	two := Entero with: 2.
-	
-	self isNegative ifTrue: [self error: Entero negativeFibonacciErrorDescription ].	
-	(self isZero or: [self isOne]) ifTrue: [^one].
-	
-	^ (self - one) fibonacci + (self - two) fibonacci! !
+	^(NumeroType typeFor: self) fibonacci.! !
 
 !Entero methodsFor: 'arithmetic operations' stamp: 'mc 9/26/2018 23:43:51'!
 greatestCommonDivisorWith: anEntero 
@@ -461,10 +453,20 @@ substractToAnEntero: anEntero
 	^self class with: anEntero integerValue - value.! !
 
 
+!Entero methodsFor: 'comparing' stamp: 'mc 9/27/2018 00:14:33'!
+< aSmallInteger
+
+	^value < aSmallInteger .! !
+
 !Entero methodsFor: 'comparing' stamp: 'mc 9/27/2018 00:13:36'!
 = anObject
 
 	^(anObject isKindOf: self class) and: [ value = anObject integerValue ]! !
+
+!Entero methodsFor: 'comparing' stamp: 'mc 9/30/2018 13:25:10'!
+> aSmallInteger
+
+	^value > aSmallInteger .! !
 
 !Entero methodsFor: 'comparing' stamp: 'mc 9/27/2018 00:13:28'!
 hash
@@ -506,12 +508,6 @@ isOne
 isZero
 	
 	^value = 0! !
-
-
-!Entero methodsFor: 'as yet unclassified' stamp: 'mc 9/27/2018 00:14:33'!
-< aSmallInteger
-
-	^value < aSmallInteger .! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -632,12 +628,12 @@ numerator
 	^ numerator! !
 
 
-!Fraccion methodsFor: 'initialization' stamp: 'mc 9/26/2018 23:51:34'!
+!Fraccion methodsFor: 'initialization' stamp: 'mc 9/30/2018 14:11:54'!
 initializeWith: aNumerator over: aDenominator
 
 	"Estas precondiciones estan por si se comenten errores en la implementacion - Hernan"
-	aNumerator isZero ifTrue: [ self error: 'una fraccion no puede ser cero' ].
-	aDenominator isOne ifTrue: [ self error: 'una fraccion no puede tener denominador 1 porque sino es un entero' ].
+	(NumeroType typeFor: aNumerator) canBeANumerator.
+	(NumeroType typeFor: aDenominator ) canBeADenominator.
 	
 	numerator := aNumerator.
 	denominator := aDenominator ! !
@@ -691,3 +687,186 @@ with: aDividend over: aDivisor
 
 	^self new initializeWith: numerator over: denominator
 	! !
+
+
+!classDefinition: #NumeroType category: #'Numero-Exercise'!
+Object subclass: #NumeroType
+	instanceVariableNames: 'numero'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numero-Exercise'!
+
+!NumeroType methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:15:27'!
+canBeADenominator
+
+	self subclassResponsibility.! !
+
+!NumeroType methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 12:34:35'!
+canBeANumerator
+
+	self subclassResponsibility.! !
+
+!NumeroType methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:36:53'!
+fibonacci
+
+	self subclassResponsibility.! !
+
+!NumeroType methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:28:37'!
+initializeFor: unNumero
+
+	numero := unNumero. ! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'NumeroType class' category: #'Numero-Exercise'!
+NumeroType class
+	instanceVariableNames: ''!
+
+!NumeroType class methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:02:39'!
+for: unNumero
+
+	^self new initializeFor: unNumero.! !
+
+!NumeroType class methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 12:59:55'!
+type: unNumero
+
+	self subclassResponsibility.! !
+
+!NumeroType class methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 14:13:25'!
+typeFor: unNumero
+
+
+| numerTypeClass |
+
+	numerTypeClass _ self subclasses detect: [ :aNumeroTypeClass | aNumeroTypeClass type: unNumero ].
+	
+	^ numerTypeClass for: unNumero.! !
+
+
+!classDefinition: #Cero category: #'Numero-Exercise'!
+NumeroType subclass: #Cero
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numero-Exercise'!
+
+!Cero methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:16:26'!
+canBeADenominator! !
+
+!Cero methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 12:45:47'!
+canBeANumerator
+
+	self error: 'una fraccion no puede ser cero'! !
+
+!Cero methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:42:41'!
+fibonacci
+
+	^ Entero with: 1.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Cero class' category: #'Numero-Exercise'!
+Cero class
+	instanceVariableNames: ''!
+
+!Cero class methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:00:36'!
+type: unNumero
+
+	^unNumero isZero.! !
+
+
+!classDefinition: #MayorAUno category: #'Numero-Exercise'!
+NumeroType subclass: #MayorAUno
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numero-Exercise'!
+
+!MayorAUno methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:18:22'!
+canBeADenominator! !
+
+!MayorAUno methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:14:44'!
+canBeANumerator! !
+
+!MayorAUno methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 14:05:33'!
+fibonacci
+
+	| one two |
+	
+	one _ Entero with: 1.
+	two _ Entero with: 2.
+	
+	^ (numero - one) fibonacci + (numero - two) fibonacci.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'MayorAUno class' category: #'Numero-Exercise'!
+MayorAUno class
+	instanceVariableNames: ''!
+
+!MayorAUno class methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:22:18'!
+type: unNumero
+
+	^unNumero > 1.! !
+
+
+!classDefinition: #Negativo category: #'Numero-Exercise'!
+NumeroType subclass: #Negativo
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numero-Exercise'!
+
+!Negativo methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:32:00'!
+canBeADenominator! !
+
+!Negativo methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:32:00'!
+canBeANumerator! !
+
+!Negativo methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:43:03'!
+fibonacci
+
+	self error: Entero negativeFibonacciErrorDescription.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Negativo class' category: #'Numero-Exercise'!
+Negativo class
+	instanceVariableNames: ''!
+
+!Negativo class methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:32:16'!
+type: unNumero
+
+	^unNumero < 0.! !
+
+
+!classDefinition: #Uno category: #'Numero-Exercise'!
+NumeroType subclass: #Uno
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numero-Exercise'!
+
+!Uno methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:18:00'!
+canBeADenominator
+
+	self error: 'una fraccion no puede tener denominador 1 porque sino es un entero'.! !
+
+!Uno methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:29:59'!
+canBeANumerator! !
+
+!Uno methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:43:25'!
+fibonacci
+
+	^Entero with: 1.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Uno class' category: #'Numero-Exercise'!
+Uno class
+	instanceVariableNames: ''!
+
+!Uno class methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:19:12'!
+type: unNumero
+
+	^unNumero isOne.! !
