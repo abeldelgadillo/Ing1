@@ -314,7 +314,7 @@ Object subclass: #Numero
 
 	self subclassResponsibility ! !
 
-!Numero methodsFor: 'arithmetic operations' stamp: 'HernanWilkinson 5/7/2016 22:48'!
+!Numero methodsFor: 'arithmetic operations' stamp: 'mc 9/30/2018 18:27:29'!
 invalidNumberType
 
 	self error: self class invalidNumberTypeErrorDescription! !
@@ -418,10 +418,10 @@ divideAnEntero: anEntero
 
 	^Fraccion with: anEntero over: self.! !
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'mc 9/30/2018 14:12:08'!
+!Entero methodsFor: 'arithmetic operations' stamp: 'mc 10/1/2018 01:27:16'!
 fibonacci
 
-	^(NumeroType typeFor: self) fibonacci.! !
+	^(NumeroTypeOperator typeFor: self) fibonacci.! !
 
 !Entero methodsFor: 'arithmetic operations' stamp: 'mc 9/26/2018 23:43:51'!
 greatestCommonDivisorWith: anEntero 
@@ -519,12 +519,13 @@ Entero class
 negativeFibonacciErrorDescription
 	^ ' Fibonacci no está definido aquí para enteros negativos'! !
 
-!Entero class methodsFor: 'instance creation' stamp: 'HernanWilkinson 5/7/2016 22:53'!
+!Entero class methodsFor: 'instance creation' stamp: 'mc 10/1/2018 01:52:22'!
 with: aValue 
 	
 	"Esta verificacion esta puesta por si se equivocan y quieren crear un Entero pasando otra cosa que un Integer - Hernan"
-	aValue isInteger ifFalse: [  self error: 'aValue debe ser anInteger' ].
+	"aValue isInteger ifFalse: [  self error: 'aValue debe ser anInteger' ]."
 	
+	(TypeOperator operatorTypeFor: aValue ) operateAsInteger.
 	^self new initalizeWith: aValue! !
 
 
@@ -628,12 +629,12 @@ numerator
 	^ numerator! !
 
 
-!Fraccion methodsFor: 'initialization' stamp: 'mc 9/30/2018 14:11:54'!
+!Fraccion methodsFor: 'initialization' stamp: 'mc 10/1/2018 01:27:16'!
 initializeWith: aNumerator over: aDenominator
 
 	"Estas precondiciones estan por si se comenten errores en la implementacion - Hernan"
-	(NumeroType typeFor: aNumerator) canBeANumerator.
-	(NumeroType typeFor: aDenominator ) canBeADenominator.
+	(NumeroTypeOperator typeFor: aNumerator) canBeANumerator.
+	(NumeroTypeOperator typeFor: aDenominator ) canBeADenominator.
 	
 	numerator := aNumerator.
 	denominator := aDenominator ! !
@@ -669,70 +670,117 @@ printOn: aStream
 Fraccion class
 	instanceVariableNames: ''!
 
-!Fraccion class methodsFor: 'intance creation' stamp: 'NR 9/23/2018 23:45:19'!
+!Fraccion class methodsFor: 'intance creation' stamp: 'mc 10/1/2018 01:27:16'!
 with: aDividend over: aDivisor
 
-	| greatestCommonDivisor numerator denominator |
+"	| greatestCommonDivisor numerator denominator| "
 	
-	aDivisor isZero ifTrue: [ self error: self canNotDivideByZeroErrorDescription ].
-	aDividend isZero ifTrue: [ ^aDividend ].
-	
-	aDivisor isNegative ifTrue:[ ^aDividend negated / aDivisor negated].
-	
-	greatestCommonDivisor := aDividend greatestCommonDivisorWith: aDivisor. 
-	numerator := aDividend // greatestCommonDivisor.
-	denominator := aDivisor // greatestCommonDivisor.
-	
-	denominator isOne ifTrue: [ ^numerator ].
-
-	^self new initializeWith: numerator over: denominator
-	! !
+	(NumeroTypeOperator typeFor:aDivisor) canBeADenominator.
+	^(NumeroTypeOperator typeFor:aDividend) instanceFraccionAsDividendWith: aDivisor . ! !
 
 
-!classDefinition: #NumeroType category: #'Numero-Exercise'!
-Object subclass: #NumeroType
+!classDefinition: #TypeOperator category: #'Numero-Exercise'!
+Object subclass: #TypeOperator
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numero-Exercise'!
+
+!TypeOperator methodsFor: 'operate' stamp: 'mc 10/1/2018 01:52:49'!
+operateAsInteger
+
+	self subclassResponsibility.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'TypeOperator class' category: #'Numero-Exercise'!
+TypeOperator class
+	instanceVariableNames: ''!
+
+!TypeOperator class methodsFor: 'operator search' stamp: 'mc 10/1/2018 01:37:04'!
+objectType: anObject
+
+	self subclassResponsibility.! !
+
+!TypeOperator class methodsFor: 'operator search' stamp: 'mc 10/1/2018 01:44:58'!
+operatorTypeFor: anObject
+
+
+| objectTypeClass |
+
+	objectTypeClass _ self subclasses detect: [ :anObjectTypeClass | anObjectTypeClass objectType: anObject ].
+	
+	^ objectTypeClass new.! !
+
+
+!classDefinition: #NumeroTypeOperator category: #'Numero-Exercise'!
+TypeOperator subclass: #NumeroTypeOperator
 	instanceVariableNames: 'numero'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Numero-Exercise'!
 
-!NumeroType methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:15:27'!
-canBeADenominator
-
-	self subclassResponsibility.! !
-
-!NumeroType methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 12:34:35'!
-canBeANumerator
-
-	self subclassResponsibility.! !
-
-!NumeroType methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:36:53'!
+!NumeroTypeOperator methodsFor: 'numero operations' stamp: 'mc 9/30/2018 13:36:53'!
 fibonacci
 
 	self subclassResponsibility.! !
 
-!NumeroType methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:28:37'!
+!NumeroTypeOperator methodsFor: 'numero operations' stamp: 'mc 10/1/2018 01:15:10'!
+instanceFraccionAsDividendWith: aDivisor
+
+	self subclassResponsibility.! !
+
+!NumeroTypeOperator methodsFor: 'numero operations' stamp: 'mc 10/1/2018 00:31:01'!
+instanceFraccionAsDivisorWith: aDividend
+
+	self subclassResponsibility.! !
+
+
+!NumeroTypeOperator methodsFor: 'evaluation' stamp: 'mc 9/30/2018 13:15:27'!
+canBeADenominator
+
+	self subclassResponsibility.! !
+
+!NumeroTypeOperator methodsFor: 'evaluation' stamp: 'mc 9/30/2018 12:34:35'!
+canBeANumerator
+
+	self subclassResponsibility.! !
+
+
+!NumeroTypeOperator methodsFor: 'initialization' stamp: 'mc 9/30/2018 13:28:37'!
 initializeFor: unNumero
 
 	numero := unNumero. ! !
 
+
+!NumeroTypeOperator methodsFor: 'operate' stamp: 'mc 10/1/2018 01:53:07'!
+operateAsInteger
+! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'NumeroType class' category: #'Numero-Exercise'!
-NumeroType class
+!classDefinition: 'NumeroTypeOperator class' category: #'Numero-Exercise'!
+NumeroTypeOperator class
 	instanceVariableNames: ''!
 
-!NumeroType class methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:02:39'!
+!NumeroTypeOperator class methodsFor: 'operator search' stamp: 'mc 10/1/2018 01:40:39'!
+objectType: anObject
+
+	^anObject  isInteger.! !
+
+
+!NumeroTypeOperator class methodsFor: 'instance creation' stamp: 'mc 9/30/2018 13:02:39'!
 for: unNumero
 
 	^self new initializeFor: unNumero.! !
 
-!NumeroType class methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 12:59:55'!
+
+!NumeroTypeOperator class methodsFor: 'numero operator search' stamp: 'mc 9/30/2018 12:59:55'!
 type: unNumero
 
 	self subclassResponsibility.! !
 
-!NumeroType class methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 14:13:25'!
+!NumeroTypeOperator class methodsFor: 'numero operator search' stamp: 'mc 9/30/2018 14:13:25'!
 typeFor: unNumero
 
 
@@ -744,24 +792,41 @@ typeFor: unNumero
 
 
 !classDefinition: #Cero category: #'Numero-Exercise'!
-NumeroType subclass: #Cero
+NumeroTypeOperator subclass: #Cero
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Numero-Exercise'!
 
-!Cero methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:16:26'!
-canBeADenominator! !
+!Cero methodsFor: 'evaluation' stamp: 'mc 9/30/2018 18:35:44'!
+canBeADenominator
 
-!Cero methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 12:45:47'!
+	self error: numero class canNotDivideByZeroErrorDescription.! !
+
+!Cero methodsFor: 'evaluation' stamp: 'mc 9/30/2018 20:16:08'!
 canBeANumerator
 
-	self error: 'una fraccion no puede ser cero'! !
+	self error: 'una fraccion no puede ser cero'.! !
 
-!Cero methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:42:41'!
+
+!Cero methodsFor: 'operations' stamp: 'mc 9/30/2018 13:42:41'!
 fibonacci
 
 	^ Entero with: 1.! !
+
+
+!Cero methodsFor: 'fraccion instantiation' stamp: 'mc 10/1/2018 01:20:14'!
+instanceFraccionAsDividendWith: aDivisor
+	
+	"caso --> aDividend isZero ifTrue: [ ^aDividend ]."
+
+	^numero .! !
+
+!Cero methodsFor: 'fraccion instantiation' stamp: 'mc 10/1/2018 00:34:44'!
+instanceFraccionAsDivisorWith: aDividend
+
+	self canBeADenominator.
+! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -769,26 +834,27 @@ fibonacci
 Cero class
 	instanceVariableNames: ''!
 
-!Cero class methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:00:36'!
+!Cero class methodsFor: 'numero operator search' stamp: 'mc 9/30/2018 13:00:36'!
 type: unNumero
 
 	^unNumero isZero.! !
 
 
 !classDefinition: #MayorAUno category: #'Numero-Exercise'!
-NumeroType subclass: #MayorAUno
+NumeroTypeOperator subclass: #MayorAUno
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Numero-Exercise'!
 
-!MayorAUno methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:18:22'!
+!MayorAUno methodsFor: 'evaluation' stamp: 'mc 9/30/2018 13:18:22'!
 canBeADenominator! !
 
-!MayorAUno methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:14:44'!
+!MayorAUno methodsFor: 'evaluation' stamp: 'mc 9/30/2018 20:13:04'!
 canBeANumerator! !
 
-!MayorAUno methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 14:05:33'!
+
+!MayorAUno methodsFor: 'operations' stamp: 'mc 9/30/2018 14:05:33'!
 fibonacci
 
 	| one two |
@@ -798,35 +864,73 @@ fibonacci
 	
 	^ (numero - one) fibonacci + (numero - two) fibonacci.! !
 
+
+!MayorAUno methodsFor: 'fraccion instantiation' stamp: 'mc 10/1/2018 01:23:39'!
+instanceFraccionAfterDivideByCMAsDivisorWith: aDividend
+
+	"caso (self =Fraccion)--> ^self new initializeWith: numerator over: denominator."
+
+	^Fraccion new initializeWith: aDividend over: numero.! !
+
+!MayorAUno methodsFor: 'fraccion instantiation' stamp: 'mc 10/1/2018 01:27:16'!
+instanceFraccionAsDividendWith: aDivisor
+
+	^(NumeroTypeOperator typeFor:aDivisor) instanceFraccionAsDivisorWith: numero.! !
+
+!MayorAUno methodsFor: 'fraccion instantiation' stamp: 'mc 10/1/2018 01:27:16'!
+instanceFraccionAsDivisorWith: aDividend
+
+ | greatestCommonDivisor numerator denominator |
+
+	greatestCommonDivisor := aDividend greatestCommonDivisorWith: numero. 
+	numerator := aDividend // greatestCommonDivisor.
+	denominator := numero // greatestCommonDivisor.
+	
+	^(NumeroTypeOperator typeFor:denominator) instanceFraccionAfterDivideByCMAsDivisorWith: numerator.! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'MayorAUno class' category: #'Numero-Exercise'!
 MayorAUno class
 	instanceVariableNames: ''!
 
-!MayorAUno class methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:22:18'!
+!MayorAUno class methodsFor: 'numero operator search' stamp: 'mc 9/30/2018 13:22:18'!
 type: unNumero
 
 	^unNumero > 1.! !
 
 
 !classDefinition: #Negativo category: #'Numero-Exercise'!
-NumeroType subclass: #Negativo
+NumeroTypeOperator subclass: #Negativo
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Numero-Exercise'!
 
-!Negativo methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:32:00'!
+!Negativo methodsFor: 'evaluation' stamp: 'mc 9/30/2018 13:32:00'!
 canBeADenominator! !
 
-!Negativo methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:32:00'!
+!Negativo methodsFor: 'evaluation' stamp: 'mc 9/30/2018 20:14:11'!
 canBeANumerator! !
 
-!Negativo methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:43:03'!
+
+!Negativo methodsFor: 'operations' stamp: 'mc 9/30/2018 13:43:03'!
 fibonacci
 
 	self error: Entero negativeFibonacciErrorDescription.! !
+
+
+!Negativo methodsFor: 'fraccion instantiation' stamp: 'mc 10/1/2018 01:27:16'!
+instanceFraccionAsDividendWith: aDivisor
+
+	^(NumeroTypeOperator typeFor:aDivisor) instanceFraccionAsDivisorWith: numero.! !
+
+!Negativo methodsFor: 'fraccion instantiation' stamp: 'mc 10/1/2018 01:21:25'!
+instanceFraccionAsDivisorWith: aDividend
+
+	"caso --> aDivisor isNegative ifTrue:[ ^aDividend negated / aDivisor negated]."
+	
+	^aDividend negated / numero negated.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -834,31 +938,49 @@ fibonacci
 Negativo class
 	instanceVariableNames: ''!
 
-!Negativo class methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:32:16'!
+!Negativo class methodsFor: 'numero operator search' stamp: 'mc 9/30/2018 13:32:16'!
 type: unNumero
 
 	^unNumero < 0.! !
 
 
 !classDefinition: #Uno category: #'Numero-Exercise'!
-NumeroType subclass: #Uno
+NumeroTypeOperator subclass: #Uno
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Numero-Exercise'!
 
-!Uno methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:18:00'!
+!Uno methodsFor: 'evaluation' stamp: 'mc 9/30/2018 13:18:00'!
 canBeADenominator
 
 	self error: 'una fraccion no puede tener denominador 1 porque sino es un entero'.! !
 
-!Uno methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:29:59'!
+!Uno methodsFor: 'evaluation' stamp: 'mc 9/30/2018 20:15:29'!
 canBeANumerator! !
 
-!Uno methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:43:25'!
+
+!Uno methodsFor: 'operations' stamp: 'mc 9/30/2018 13:43:25'!
 fibonacci
 
 	^Entero with: 1.! !
+
+
+!Uno methodsFor: 'fraccion instantiation' stamp: 'mc 10/1/2018 00:49:14'!
+instanceFraccionAfterDivideByCMAsDivisorWith: aDividend
+
+	^self instanceFraccionAsDivisorWith: aDividend .! !
+
+!Uno methodsFor: 'fraccion instantiation' stamp: 'mc 10/1/2018 01:27:16'!
+instanceFraccionAsDividendWith: aDivisor
+
+	^(NumeroTypeOperator typeFor:aDivisor) instanceFraccionAsDivisorWith: numero.! !
+
+!Uno methodsFor: 'fraccion instantiation' stamp: 'mc 10/1/2018 01:23:00'!
+instanceFraccionAsDivisorWith: aDividend
+
+	"caso --> denominator isOne ifTrue: [ ^numerator ]."
+	^aDividend.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -866,7 +988,31 @@ fibonacci
 Uno class
 	instanceVariableNames: ''!
 
-!Uno class methodsFor: 'as yet unclassified' stamp: 'mc 9/30/2018 13:19:12'!
+!Uno class methodsFor: 'numero operator search' stamp: 'mc 9/30/2018 13:19:12'!
 type: unNumero
 
 	^unNumero isOne.! !
+
+
+!classDefinition: #OtherTypeOperator category: #'Numero-Exercise'!
+TypeOperator subclass: #OtherTypeOperator
+	instanceVariableNames: 'numero'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numero-Exercise'!
+
+!OtherTypeOperator methodsFor: 'operate' stamp: 'mc 10/1/2018 01:53:33'!
+operateAsInteger
+	
+	self error: 'aValue debe ser anInteger'.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'OtherTypeOperator class' category: #'Numero-Exercise'!
+OtherTypeOperator class
+	instanceVariableNames: ''!
+
+!OtherTypeOperator class methodsFor: 'operator-search' stamp: 'mc 10/1/2018 01:49:16'!
+objectType: anObject
+
+	^anObject  isInteger not.! !
