@@ -140,16 +140,53 @@ balance
 	^accounts first balance + accounts last balance.! !
 
 
-!Portfolio methodsFor: 'testing' stamp: 'HAW 10/11/2018 16:53:28'!
-doesManage: anAccount
+!Portfolio methodsFor: 'testing' stamp: 'mc 10/15/2018 11:33:14'!
+doesManage: anItem
 
-	self shouldBeImplemented 
-! !
+	| iManageIt |
+	
+	iManageIt  _ accounts includes: anItem .
 
-!Portfolio methodsFor: 'testing' stamp: 'HAW 10/11/2018 16:53:54'!
+	iManageIt ifFalse: [^self doesMyPortfoliosManage: anItem .].
+	
+	^iManageIt.! !
+
+!Portfolio methodsFor: 'testing' stamp: 'mc 10/15/2018 11:22:58'!
+doesMyPortfoliosManage: anAccount
+
+	| iManageTheAccount |
+	iManageTheAccount  _ false.
+	
+	accounts do: [ :aPortfolioAccount | 
+					aPortfolioAccount class = Portfolio
+					ifTrue: [ (aPortfolioAccount doesManage: anAccount) ifTrue:[iManageTheAccount _ true] ]
+					].
+		
+	^iManageTheAccount.! !
+
+!Portfolio methodsFor: 'testing' stamp: 'mc 10/15/2018 12:32:00'!
+find: anAccount
+
+	(accounts includes: anAccount)  
+		ifTrue: [^accounts at: (accounts indexOf:anAccount). ]
+		ifFalse:  [^self findInPortfolios: anAccount ].! !
+
+!Portfolio methodsFor: 'testing' stamp: 'mc 10/15/2018 11:35:49'!
+findInPortfolios: anAccount
+
+	accounts do: [ :aPortfolioAccount | 
+					aPortfolioAccount class = Portfolio
+					ifTrue: [ (aPortfolioAccount doesManage: anAccount) ifTrue:[^aPortfolioAccount find:anAccount ] ]
+					].! !
+
+!Portfolio methodsFor: 'testing' stamp: 'mc 10/14/2018 19:56:23'!
 hasRegistered: aTransaction
 
-	self shouldBeImplemented ! !
+"	self shouldBeImplemented "
+
+	accounts do:[ :anAccount | anAccount hasRegistered: aTransaction. ^true. ].
+
+	^false.! !
 
 !Portfolio methodsFor: 'testing' stamp: 'A 10/14/2018 13:59:45'!
 initializeWith: leftAccount with: rightAccount
@@ -160,15 +197,28 @@ initializeWith: leftAccount with: rightAccount
 	accounts add: rightAccount .! !
 
 
-!Portfolio methodsFor: 'transactions' stamp: 'HernanWilkinson 7/13/2011 18:39'!
+!Portfolio methodsFor: 'transactions' stamp: 'mc 10/15/2018 02:35:17'!
 transactions 
 
-	self shouldBeImplemented ! !
+	| transactionsList |
+	
+	transactionsList  _ OrderedCollection new.
+	
+	accounts do:[ :anItem | 
+					 transactionsList addAllLast: (anItem transactions)].
+				
+	^transactionsList .! !
 
-!Portfolio methodsFor: 'transactions' stamp: 'HernanWilkinson 7/13/2011 18:40'!
+!Portfolio methodsFor: 'transactions' stamp: 'mc 10/15/2018 12:59:32'!
 transactionsOf: anAccount 
 
-	self shouldBeImplemented ! !
+	| iManageIt theAccount|
+		
+	iManageIt _ self doesManage: anAccount.
+	iManageIt  ifTrue: [
+						theAccount _ self find: anAccount.
+						^theAccount transactions]
+				ifFalse: [self error: self class accountNotManagedMessageDescription ].! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -176,9 +226,9 @@ transactionsOf: anAccount
 Portfolio class
 	instanceVariableNames: ''!
 
-!Portfolio class methodsFor: 'instance creation' stamp: 'A 10/14/2018 14:00:11'!
+!Portfolio class methodsFor: 'instance creation' stamp: 'mc 10/15/2018 13:09:44'!
 with: leftAccount with: rightAccount
-
+	leftAccount = rightAccount  ifTrue:[self error: self accountAlreadyManagedErrorMessage ].
 	^self new initializeWith: leftAccount with: rightAccount .! !
 
 !Portfolio class methodsFor: 'instance creation' stamp: 'HernanWilkinson 7/13/2011 18:41'!
