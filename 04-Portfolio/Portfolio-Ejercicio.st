@@ -134,10 +134,10 @@ SummarizingAccount subclass: #Portfolio
 	poolDictionaries: ''
 	category: 'Portfolio-Ejercicio'!
 
-!Portfolio methodsFor: 'balance' stamp: 'A 10/14/2018 14:01:25'!
+!Portfolio methodsFor: 'balance' stamp: 'A 10/16/2018 17:26:43'!
 balance
 
-	^accounts first balance + accounts last balance.! !
+	^accounts inject: 0 into: [:balance :account | balance + account balance].! !
 
 
 !Portfolio methodsFor: 'testing' stamp: 'mc 10/15/2018 21:35:36'!
@@ -165,12 +165,11 @@ initializeWithAll: aCollectionOfAccounts
 
 	accounts := aCollectionOfAccounts.! !
 
-!Portfolio methodsFor: 'testing' stamp: 'mc 10/15/2018 21:44:31'!
+!Portfolio methodsFor: 'testing' stamp: 'A 10/16/2018 17:27:05'!
 manageAnyEqualAccount: aPorfolio
 
-	(self allManagedAccounts) do: [ :aReceptiveAccount | 
-										(aPorfolio doesManage: aReceptiveAccount ) ifTrue:  [^true]].
-	^false! !
+	^(self allManagedAccounts) anySatisfy: [ :aReceptiveAccount | 
+										(aPorfolio doesManage: aReceptiveAccount )].! !
 
 
 !Portfolio methodsFor: 'transactions' stamp: 'A 10/15/2018 12:19:04'!
