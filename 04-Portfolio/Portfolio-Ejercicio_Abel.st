@@ -140,10 +140,12 @@ balance
 	^accounts first balance + accounts last balance.! !
 
 
-!Portfolio methodsFor: 'testing' stamp: 'A 10/14/2018 14:14:26'!
+!Portfolio methodsFor: 'testing' stamp: 'A 10/16/2018 16:12:40'!
 doesManage: anAccount
 
-	^accounts anySatisfy: [:account | account = anAccount or: (account doesManage: anAccount)].! !
+	^(anAccount isKindOf: ReceptiveAccount) 
+		ifTrue: [accounts anySatisfy: [:account | account = anAccount or: (account doesManage: anAccount)]]
+		ifFalse: [accounts anySatisfy: [:account | anAccount doesManage: account]]! !
 
 !Portfolio methodsFor: 'testing' stamp: 'A 10/14/2018 14:11:50'!
 hasRegistered: aTransaction
