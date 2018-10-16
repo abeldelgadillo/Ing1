@@ -140,63 +140,85 @@ balance
 	^accounts first balance + accounts last balance.! !
 
 
-!Portfolio methodsFor: 'testing' stamp: 'mc 10/15/2018 21:35:36'!
-doesManage: anAccount
+!Portfolio methodsFor: 'testing' stamp: 'mc 10/15/2018 11:33:14'!
+doesManage: anItem
 
-	 ^anAccount  iAmManagedBy: self.! !
+	| iManageIt |
+	
+	iManageIt  _ accounts includes: anItem .
 
-!Portfolio methodsFor: 'testing' stamp: 'A 10/14/2018 14:11:50'!
+	iManageIt ifFalse: [^self doesMyPortfoliosManage: anItem .].
+	
+	^iManageIt.! !
+
+!Portfolio methodsFor: 'testing' stamp: 'mc 10/15/2018 11:22:58'!
+doesMyPortfoliosManage: anAccount
+
+	| iManageTheAccount |
+	iManageTheAccount  _ false.
+	
+	accounts do: [ :aPortfolioAccount | 
+					aPortfolioAccount class = Portfolio
+					ifTrue: [ (aPortfolioAccount doesManage: anAccount) ifTrue:[iManageTheAccount _ true] ]
+					].
+		
+	^iManageTheAccount.! !
+
+!Portfolio methodsFor: 'testing' stamp: 'mc 10/15/2018 12:32:00'!
+find: anAccount
+
+	(accounts includes: anAccount)  
+		ifTrue: [^accounts at: (accounts indexOf:anAccount). ]
+		ifFalse:  [^self findInPortfolios: anAccount ].! !
+
+!Portfolio methodsFor: 'testing' stamp: 'mc 10/15/2018 11:35:49'!
+findInPortfolios: anAccount
+
+	accounts do: [ :aPortfolioAccount | 
+					aPortfolioAccount class = Portfolio
+					ifTrue: [ (aPortfolioAccount doesManage: anAccount) ifTrue:[^aPortfolioAccount find:anAccount ] ]
+					].! !
+
+!Portfolio methodsFor: 'testing' stamp: 'mc 10/14/2018 19:56:23'!
 hasRegistered: aTransaction
 
-	^accounts anySatisfy: [:account | account hasRegistered: aTransaction ].! !
+"	self shouldBeImplemented "
 
-!Portfolio methodsFor: 'testing' stamp: 'mc 10/15/2018 21:25:50'!
-iAmManagedBy: aPorfolio
+	accounts do:[ :anAccount | anAccount hasRegistered: aTransaction. ^true. ].
 
-	^aPorfolio manageAnyEqualAccount: self.! !
+	^false.! !
 
-!Portfolio methodsFor: 'testing' stamp: 'mc 10/15/2018 21:19:29'!
-iAmTheManagerOf: anAccount
+!Portfolio methodsFor: 'testing' stamp: 'A 10/14/2018 13:59:45'!
+initializeWith: leftAccount with: rightAccount
 
-	^accounts anySatisfy: [:account | account = anAccount or: (account doesManage: anAccount)].! !
-
-!Portfolio methodsFor: 'testing' stamp: 'A 10/15/2018 13:50:52'!
-initializeWithAll: aCollectionOfAccounts
-
-	accounts := aCollectionOfAccounts.! !
-
-!Portfolio methodsFor: 'testing' stamp: 'mc 10/15/2018 21:44:31'!
-manageAnyEqualAccount: aPorfolio
-
-	(self allManagedAccounts) do: [ :aReceptiveAccount | 
-										(aPorfolio doesManage: aReceptiveAccount ) ifTrue:  [^true]].
-	^false! !
+	accounts := OrderedCollection new.
+	
+	accounts add: leftAccount .
+	accounts add: rightAccount .! !
 
 
-!Portfolio methodsFor: 'transactions' stamp: 'A 10/15/2018 12:19:04'!
+!Portfolio methodsFor: 'transactions' stamp: 'mc 10/15/2018 02:35:17'!
 transactions 
 
-	^accounts inject: OrderedCollection new into: [:transactionsOfPortfolio :account | 
-		transactionsOfPortfolio addAll: account transactions.
-		transactionsOfPortfolio.]! !
+	| transactionsList |
+	
+	transactionsList  _ OrderedCollection new.
+	
+	accounts do:[ :anItem | 
+					 transactionsList addAllLast: (anItem transactions)].
+				
+	^transactionsList .! !
 
-!Portfolio methodsFor: 'transactions' stamp: 'A 10/15/2018 13:47:24'!
+!Portfolio methodsFor: 'transactions' stamp: 'mc 10/15/2018 12:59:32'!
 transactionsOf: anAccount 
 
-	^(self doesManage: anAccount) 
-	ifTrue: [anAccount transactions.] 
-	ifFalse: [self error: self class accountNotManagedMessageDescription]! !
-
-
-!Portfolio methodsFor: 'private' stamp: 'mc 10/15/2018 21:44:07'!
-allManagedAccounts
-	
-	| allReceptive |
-	allReceptive _ OrderedCollection  new.
-	
-	accounts do:[ :anAccount | allReceptive addAll: (anAccount allManagedAccounts)].
-	
-	^allReceptive .! !
+	| iManageIt theAccount|
+		
+	iManageIt _ self doesManage: anAccount.
+	iManageIt  ifTrue: [
+						theAccount _ self find: anAccount.
+						^theAccount transactions]
+				ifFalse: [self error: self class accountNotManagedMessageDescription ].! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -204,17 +226,15 @@ allManagedAccounts
 Portfolio class
 	instanceVariableNames: ''!
 
-!Portfolio class methodsFor: 'instance creation' stamp: 'A 10/15/2018 14:00:10'!
+!Portfolio class methodsFor: 'instance creation' stamp: 'mc 10/15/2018 13:09:44'!
 with: leftAccount with: rightAccount
+	leftAccount = rightAccount  ifTrue:[self error: self accountAlreadyManagedErrorMessage ].
+	^self new initializeWith: leftAccount with: rightAccount .! !
 
-	^((leftAccount doesManage: rightAccount) or:(rightAccount doesManage: leftAccount)) 
-	ifTrue: [self error: self accountAlreadyManagedErrorMessage] 
-	ifFalse: [self withAll: (Array with: leftAccount with: rightAccount)].! !
-
-!Portfolio class methodsFor: 'instance creation' stamp: 'A 10/15/2018 13:55:07'!
+!Portfolio class methodsFor: 'instance creation' stamp: 'HernanWilkinson 7/13/2011 18:41'!
 withAll: aCollectionOfAccounts
 
-	^self new initializeWithAll: aCollectionOfAccounts.! !
+	self shouldBeImplemented ! !
 
 
 !Portfolio class methodsFor: 'error messages' stamp: 'HAW 5/8/2018 16:08:43'!
@@ -271,15 +291,3 @@ hasRegistered: aTtransaction
 
 	^ transactions includes: aTtransaction 
 ! !
-
-!ReceptiveAccount methodsFor: 'testing' stamp: 'mc 10/15/2018 21:18:52'!
-iAmManagedBy: aPorfolio
-
-	^aPorfolio iAmTheManagerOf: self.
-! !
-
-
-!ReceptiveAccount methodsFor: 'private' stamp: 'mc 10/15/2018 21:46:07'!
-allManagedAccounts
-	
-	^ OrderedCollection with: self.! !
