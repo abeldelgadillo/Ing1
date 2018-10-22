@@ -77,6 +77,67 @@ register: aValue on: account
 	^ withdraw! !
 
 
+!classDefinition: #TransferLeg category: #'PortfolioTreePrinter-Ejercicio'!
+AccountTransaction subclass: #TransferLeg
+	instanceVariableNames: 'transfer'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+!TransferLeg methodsFor: 'initialization' stamp: 'mc 10/21/2018 22:08:48'!
+initializeVia: aTransfer
+
+	transfer := aTransfer ! !
+
+
+!TransferLeg methodsFor: 'accessing' stamp: 'mc 10/21/2018 22:15:37'!
+transfer
+
+	^ transfer.! !
+
+!TransferLeg methodsFor: 'accessing' stamp: 'mc 10/21/2018 22:14:48'!
+value
+
+	^ transfer value! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'TransferLeg class' category: #'PortfolioTreePrinter-Ejercicio'!
+TransferLeg class
+	instanceVariableNames: ''!
+
+!TransferLeg class methodsFor: 'instance creation' stamp: 'mc 10/21/2018 22:13:48'!
+registerVia: aTransfer
+
+	^ self new initializeVia: aTransfer.! !
+
+
+!classDefinition: #DepositLeg category: #'PortfolioTreePrinter-Ejercicio'!
+TransferLeg subclass: #DepositLeg
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+!DepositLeg methodsFor: 'value' stamp: 'mc 10/21/2018 20:26:14'!
+affectBalance: currentBalance
+
+	^currentBalance + self value! !
+
+
+!classDefinition: #WithdrawLeg category: #'PortfolioTreePrinter-Ejercicio'!
+TransferLeg subclass: #WithdrawLeg
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+!WithdrawLeg methodsFor: 'value' stamp: 'mc 10/21/2018 20:27:40'!
+affectBalance: currentBalance
+
+	^currentBalance - self value! !
+
+
 !classDefinition: #Withdraw category: #'PortfolioTreePrinter-Ejercicio'!
 AccountTransaction subclass: #Withdraw
 	instanceVariableNames: 'value'
@@ -303,7 +364,7 @@ hasRegistered: aTtransaction
 
 !classDefinition: #Transfer category: #'PortfolioTreePrinter-Ejercicio'!
 Object subclass: #Transfer
-	instanceVariableNames: 'withdrawLeg depositLeg'
+	instanceVariableNames: 'value withdrawLeg depositLeg'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
@@ -313,10 +374,10 @@ depositLeg
 
 	^depositLeg.! !
 
-!Transfer methodsFor: 'accessing' stamp: 'mc 10/18/2018 20:20:44'!
+!Transfer methodsFor: 'accessing' stamp: 'mc 10/21/2018 22:12:46'!
 value
 
-  ^ withdrawLeg value.! !
+  ^ value.! !
 
 !Transfer methodsFor: 'accessing' stamp: 'mc 10/18/2018 19:50:16'!
 withdrawLeg
@@ -324,18 +385,15 @@ withdrawLeg
 	^withdrawLeg.! !
 
 
-!Transfer methodsFor: 'initialization' stamp: 'mc 10/18/2018 20:05:44'!
-initializeFor: aSmallInteger from: fromAccount to: toAaccount 
+!Transfer methodsFor: 'initialization' stamp: 'mc 10/21/2018 22:12:20'!
+initializeFor: aSmallInteger from: fromAccount to: toAccount 
 	
 	value _ aSmallInteger.
-	withdrawLeg _ fromAccount.
-	depositLeg _ toAaccount .! !
-
-!Transfer methodsFor: 'initialization' stamp: 'mc 10/18/2018 20:16:17'!
-initializeWith: aWithdraw and: aDeposit 
-	
-	withdrawLeg _ aWithdraw .
-	depositLeg _ aDeposit .! !
+	withdrawLeg _ WithdrawLeg registerVia: self.
+	fromAccount  register: withdrawLeg .
+	depositLeg _ DepositLeg  registerVia: self.
+	toAccount  register: depositLeg .
+	! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -343,19 +401,15 @@ initializeWith: aWithdraw and: aDeposit
 Transfer class
 	instanceVariableNames: ''!
 
-!Transfer class methodsFor: 'instance creation' stamp: 'mc 10/18/2018 20:26:06'!
+!Transfer class methodsFor: 'instance creation' stamp: 'mc 10/21/2018 22:00:50'!
 register: aValue from:fromAccount to: toAccount 
 
+"
 	| transaction withdraw deposit |
 	
 	deposit _ Deposit register: aValue on: toAccount .
 	withdraw _ Withdraw register: aValue on: fromAccount .
 	
 	transaction _ self withdrawLeg: withdraw  depositLeg: deposit .
-	
-	^ transaction ! !
-
-!Transfer class methodsFor: 'instance creation' stamp: 'mc 10/18/2018 20:14:56'!
-withdrawLeg: aWithdraw  depositLeg: aDeposit .
-	
-	^ self new initializeWith: aWithdraw  and:aDeposit.! !
+"	
+	^  self new initializeFor: aValue from: fromAccount to: toAccount .! !
