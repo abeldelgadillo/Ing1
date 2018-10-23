@@ -5,11 +5,6 @@ TestCase subclass: #PortfolioTest
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Tests'!
 
-!PortfolioTest methodsFor: 'tests' stamp: 'HAW 10/18/2018 18:28:42'!
-registerDepositFor: amount into: account
-	
-	^Deposit register: amount on: account.! !
-
 !PortfolioTest methodsFor: 'tests' stamp: 'HAW 10/18/2018 16:20:55'!
 test01ReceptiveAccountHaveZeroAsBalanceWhenCreated 
 
@@ -528,40 +523,46 @@ test29ReversePortfolioTreePrinterPrintsTheCompositeStartingFromTheLeaves
 	! !
 
 
-!PortfolioTest methodsFor: 'test support' stamp: 'A 10/20/2018 14:15:11'!
+!PortfolioTest methodsFor: 'test support' stamp: 'mc 10/22/2018 20:21:49'!
 accountSummaryLinesOf: aReceptiveAccount 
-	
-	^aReceptiveAccount accountSummary.! !
 
-!PortfolioTest methodsFor: 'test support' stamp: 'A 10/20/2018 14:20:27'!
+	
+	^(AccountSummaryLines for: aReceptiveAccount)  value.! !
+
+!PortfolioTest methodsFor: 'test support' stamp: 'mc 10/22/2018 20:21:42'!
 accountTransferNetOf: aReceptiveAccount 
 	
-	^aReceptiveAccount accountTransferNet ! !
+	^(AccountTransferNet for:aReceptiveAccount ) value.! !
 
-!PortfolioTest methodsFor: 'test support' stamp: 'A 10/20/2018 18:48:11'!
+!PortfolioTest methodsFor: 'test support' stamp: 'mc 10/23/2018 18:53:27'!
 investmentEarningsOf: aReceptiveAccount 
 	
-	^aReceptiveAccount investmentEarnings.! !
+	^(InvestmentEarnings for: aReceptiveAccount ) value.! !
 
-!PortfolioTest methodsFor: 'test support' stamp: 'A 10/20/2018 16:34:05'!
+!PortfolioTest methodsFor: 'test support' stamp: 'mc 10/22/2018 20:52:16'!
 investmentNetOf: aReceptiveAccount 
 	
-	^aReceptiveAccount investmentNet.! !
+	^(InvestmentNet for: aReceptiveAccount ) value.! !
 
 !PortfolioTest methodsFor: 'test support' stamp: 'HernanWilkinson 9/6/2016 19:43'!
 portofolioTreeOf: aPortfolio namingAccountWith: aDictionary 
 	
 	self shouldBeImplemented ! !
 
-!PortfolioTest methodsFor: 'test support' stamp: 'A 10/20/2018 16:12:11'!
+!PortfolioTest methodsFor: 'test support' stamp: 'mc 10/22/2018 20:40:41'!
 registerCertificateOfDepositOf: anAmount during: aNumberOfDays at: anInteresRate on: anAccount
 
-	^CertificateOfDeposit of: anAmount during: aNumberOfDays at: anInteresRate on: anAccount ! !
+	^CertificateOfDeposit register:anAmount during:aNumberOfDays at:anInteresRate on:anAccount .! !
 
-!PortfolioTest methodsFor: 'test support' stamp: 'A 10/20/2018 13:12:00'!
+!PortfolioTest methodsFor: 'test support' stamp: 'HAW 10/18/2018 18:28:42'!
+registerDepositFor: amount into: account
+	
+	^Deposit register: amount on: account.! !
+
+!PortfolioTest methodsFor: 'test support' stamp: 'mc 10/21/2018 20:18:53'!
 registerTransferOf: anAmount from: fromAccount to: toAccount
 
-	^Transfer register: anAmount from: fromAccount to: toAccount .! !
+	^Transfer register: anAmount from: fromAccount  to: toAccount.! !
 
 !PortfolioTest methodsFor: 'test support' stamp: 'HernanWilkinson 9/6/2016 19:43'!
 reversePortofolioTreeOf: aPortfolio namingAccountWith: aDictionary 
