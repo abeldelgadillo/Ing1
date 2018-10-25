@@ -544,10 +544,10 @@ investmentNetOf: aReceptiveAccount
 	
 	^(InvestmentNet for: aReceptiveAccount ) value.! !
 
-!PortfolioTest methodsFor: 'test support' stamp: 'mc 10/24/2018 19:24:19'!
+!PortfolioTest methodsFor: 'test support' stamp: 'mc 10/25/2018 15:18:24'!
 portofolioTreeOf: aPortfolio namingAccountWith: aDictionary 
 	
-	^(PortfolioTree for:aPortfolio ) treeLinesWith:aDictionary and: 0.! !
+	^(PortfolioTree for:aPortfolio namingWith:aDictionary) print.! !
 
 !PortfolioTest methodsFor: 'test support' stamp: 'mc 10/22/2018 20:40:41'!
 registerCertificateOfDepositOf: anAmount during: aNumberOfDays at: anInteresRate on: anAccount
@@ -564,7 +564,7 @@ registerTransferOf: anAmount from: fromAccount to: toAccount
 
 	^Transfer register: anAmount from: fromAccount  to: toAccount.! !
 
-!PortfolioTest methodsFor: 'test support' stamp: 'HernanWilkinson 9/6/2016 19:43'!
+!PortfolioTest methodsFor: 'test support' stamp: 'mc 10/25/2018 15:52:02'!
 reversePortofolioTreeOf: aPortfolio namingAccountWith: aDictionary 
 	
-	self shouldBeImplemented ! !
+	^(PortfolioTree for:aPortfolio namingWith:aDictionary) reversePrint .! !
