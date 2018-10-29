@@ -1,95 +1,3 @@
-!classDefinition: #AccountSummaryWithAllInvestmentInformation category: #'PortfolioTimeConsuming-Ejercicio'!
-Object subclass: #AccountSummaryWithAllInvestmentInformation
-	instanceVariableNames: 'account'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'PortfolioTimeConsuming-Ejercicio'!
-
-!AccountSummaryWithAllInvestmentInformation methodsFor: 'initialization' stamp: 'HernanWilkinson 7/17/2011 23:56'!
-initializeFor: aReceptiveAccount 
-	
-	account := aReceptiveAccount ! !
-
-
-!AccountSummaryWithAllInvestmentInformation methodsFor: 'evaluating' stamp: 'mc 10/28/2018 12:10:35'!
-lines 
-
-	| lines investmentEarnings semaphore |
-	
-	semaphore _ Semaphore new.	
-	[investmentEarnings := (InvestmentNetVisitor for: account) value. semaphore  signal] fork.
-	
-	lines := (AccountSummaryWithInvestmentEarnings for: account) lines. 
-	semaphore  wait.
-	lines add: 'Inversiones por ', investmentEarnings printString.
-	
-	 ^ lines! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'AccountSummaryWithAllInvestmentInformation class' category: #'PortfolioTimeConsuming-Ejercicio'!
-AccountSummaryWithAllInvestmentInformation class
-	instanceVariableNames: ''!
-
-!AccountSummaryWithAllInvestmentInformation class methodsFor: 'instance creation' stamp: 'HernanWilkinson 7/17/2011 23:56'!
-for: aReceptiveAccount 
-
-	^ self new initializeFor: aReceptiveAccount ! !
-
-
-!classDefinition: #AccountSummaryWithInvestmentEarnings category: #'PortfolioTimeConsuming-Ejercicio'!
-Object subclass: #AccountSummaryWithInvestmentEarnings
-	instanceVariableNames: 'account'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'PortfolioTimeConsuming-Ejercicio'!
-
-!AccountSummaryWithInvestmentEarnings methodsFor: 'initialization' stamp: 'HernanWilkinson 7/17/2011 23:52'!
-initializeFor: aReceptiveAccount 
-	
-	account := aReceptiveAccount ! !
-
-
-!AccountSummaryWithInvestmentEarnings methodsFor: 'evaluating' stamp: 'mc 10/28/2018 12:11:50'!
-lines 
-
-	|  lines investmentEarnings semaphore |
-	
-	semaphore := Semaphore new.
-	[investmentEarnings _ (InvestmentEarningVisitor for: account) value. semaphore signal] fork.
-	lines := (AccountSummary for: account) lines.
-	semaphore  wait.
-	lines add: 'Ganancias por ', investmentEarnings printString .
-	
-	 ^ lines
-
-"
-	|  lines invest investmentEarnings semaphore |
-	
-	investmentEarnings := InvestmentEarningVisitor for: account.
-	
-	semaphore := Semaphore new.
-	[lines := (AccountSummary for: account) lines. semaphore signal] fork.
-	invest _ investmentEarnings value printString .
-	semaphore  wait.
-	lines add: 'Ganancias por ', invest.
-	
-	 ^ lines
-	
-	"! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'AccountSummaryWithInvestmentEarnings class' category: #'PortfolioTimeConsuming-Ejercicio'!
-AccountSummaryWithInvestmentEarnings class
-	instanceVariableNames: ''!
-
-!AccountSummaryWithInvestmentEarnings class methodsFor: 'instance creation' stamp: 'HernanWilkinson 7/17/2011 23:51'!
-for: aReceptiveAccount 
-
-	^ self new initializeFor: aReceptiveAccount ! !
-
-
 !classDefinition: #AccountTransaction category: #'PortfolioTimeConsuming-Ejercicio'!
 Object subclass: #AccountTransaction
 	instanceVariableNames: ''
@@ -395,72 +303,6 @@ visitWithdraw: aWithdraw
 	self subclassResponsibility ! !
 
 
-!classDefinition: #AccountSummary category: #'PortfolioTimeConsuming-Ejercicio'!
-AccountTransactionVisitor subclass: #AccountSummary
-	instanceVariableNames: 'account lines'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'PortfolioTimeConsuming-Ejercicio'!
-
-!AccountSummary methodsFor: 'visiting' stamp: 'HAW 8/13/2017 17:57:33'!
-visitCertificateOfDeposit: aCertificateOfDeposit 
-	
-	lines add: 
-		'Plazo fijo por ', aCertificateOfDeposit value printString, 
-		' durante ', aCertificateOfDeposit days printString, 
-		' dias a una tna de ', (aCertificateOfDeposit tna * 100) printString, '%'! !
-
-!AccountSummary methodsFor: 'visiting' stamp: 'HAW 8/13/2017 17:57:37'!
-visitDeposit: aDeposit 
-	
-	lines add: 'Deposito por ', aDeposit value printString ! !
-
-!AccountSummary methodsFor: 'visiting' stamp: 'HernanWilkinson 7/14/2011 06:56'!
-visitTransferDeposit: aTransferDeposit 
-	
-	^ lines add: 'Transferencia por ', aTransferDeposit value  printString ! !
-
-!AccountSummary methodsFor: 'visiting' stamp: 'HernanWilkinson 7/14/2011 06:53'!
-visitTransferWithdraw: aTransferWithdraw 
-	
-	^ lines add: 'Transferencia por ', aTransferWithdraw value negated printString ! !
-
-!AccountSummary methodsFor: 'visiting' stamp: 'HAW 8/13/2017 17:57:45'!
-visitWithdraw: aWithdraw 
-
-	lines add: 'Extraccion por ', aWithdraw value printString ! !
-
-
-!AccountSummary methodsFor: 'evaluating' stamp: 'abel 10/25/2018 21:12:22'!
-lines
-	
-	(Delay forSeconds: 1) wait.
-	
-	lines := OrderedCollection new.
-	
-	account visitTransactionsWith: self.
-	
-	^ lines! !
-
-
-!AccountSummary methodsFor: 'initialization' stamp: 'HernanWilkinson 7/14/2011 05:41'!
-initializeFor: aReceptiveAccount 
-	
-	account := aReceptiveAccount 
-	! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'AccountSummary class' category: #'PortfolioTimeConsuming-Ejercicio'!
-AccountSummary class
-	instanceVariableNames: ''!
-
-!AccountSummary class methodsFor: 'instance creation' stamp: 'HernanWilkinson 7/14/2011 05:40'!
-for: aReceptiveAccount 
-
-	^ self new initializeFor: aReceptiveAccount ! !
-
-
 !classDefinition: #AccountTransferNetVisitor category: #'PortfolioTimeConsuming-Ejercicio'!
 AccountTransactionVisitor subclass: #AccountTransferNetVisitor
 	instanceVariableNames: 'account value'
@@ -689,6 +531,176 @@ InvestmentNetVisitor class
 !InvestmentNetVisitor class methodsFor: 'instance creation' stamp: 'HernanWilkinson 7/14/2011 06:11'!
 for: aReceptiveAccount 
 	
+	^ self new initializeFor: aReceptiveAccount ! !
+
+
+!classDefinition: #SummaryDescriptor category: #'PortfolioTimeConsuming-Ejercicio'!
+AccountTransactionVisitor subclass: #SummaryDescriptor
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTimeConsuming-Ejercicio'!
+
+!SummaryDescriptor methodsFor: 'evaluating' stamp: 'mc 10/29/2018 14:17:52'!
+initializeFor: anAccount
+
+	self subclassResponsibility ! !
+
+!SummaryDescriptor methodsFor: 'evaluating' stamp: 'mc 10/29/2018 14:15:45'!
+lines
+
+	self subclassResponsibility ! !
+
+
+!classDefinition: #AccountSummary category: #'PortfolioTimeConsuming-Ejercicio'!
+SummaryDescriptor subclass: #AccountSummary
+	instanceVariableNames: 'account lines'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTimeConsuming-Ejercicio'!
+
+!AccountSummary methodsFor: 'visiting' stamp: 'HAW 8/13/2017 17:57:33'!
+visitCertificateOfDeposit: aCertificateOfDeposit 
+	
+	lines add: 
+		'Plazo fijo por ', aCertificateOfDeposit value printString, 
+		' durante ', aCertificateOfDeposit days printString, 
+		' dias a una tna de ', (aCertificateOfDeposit tna * 100) printString, '%'! !
+
+!AccountSummary methodsFor: 'visiting' stamp: 'HAW 8/13/2017 17:57:37'!
+visitDeposit: aDeposit 
+	
+	lines add: 'Deposito por ', aDeposit value printString ! !
+
+!AccountSummary methodsFor: 'visiting' stamp: 'HernanWilkinson 7/14/2011 06:56'!
+visitTransferDeposit: aTransferDeposit 
+	
+	^ lines add: 'Transferencia por ', aTransferDeposit value  printString ! !
+
+!AccountSummary methodsFor: 'visiting' stamp: 'HernanWilkinson 7/14/2011 06:53'!
+visitTransferWithdraw: aTransferWithdraw 
+	
+	^ lines add: 'Transferencia por ', aTransferWithdraw value negated printString ! !
+
+!AccountSummary methodsFor: 'visiting' stamp: 'HAW 8/13/2017 17:57:45'!
+visitWithdraw: aWithdraw 
+
+	lines add: 'Extraccion por ', aWithdraw value printString ! !
+
+
+!AccountSummary methodsFor: 'evaluating' stamp: 'abel 10/25/2018 21:12:22'!
+lines
+	
+	(Delay forSeconds: 1) wait.
+	
+	lines := OrderedCollection new.
+	
+	account visitTransactionsWith: self.
+	
+	^ lines! !
+
+
+!AccountSummary methodsFor: 'initialization' stamp: 'HernanWilkinson 7/14/2011 05:41'!
+initializeFor: aReceptiveAccount 
+	
+	account := aReceptiveAccount 
+	! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'AccountSummary class' category: #'PortfolioTimeConsuming-Ejercicio'!
+AccountSummary class
+	instanceVariableNames: ''!
+
+!AccountSummary class methodsFor: 'instance creation' stamp: 'HernanWilkinson 7/14/2011 05:40'!
+for: aReceptiveAccount 
+
+	^ self new initializeFor: aReceptiveAccount ! !
+
+
+!classDefinition: #AccountSummaryWithInvestment category: #'PortfolioTimeConsuming-Ejercicio'!
+SummaryDescriptor subclass: #AccountSummaryWithInvestment
+	instanceVariableNames: 'account'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTimeConsuming-Ejercicio'!
+
+!AccountSummaryWithInvestment methodsFor: 'as yet unclassified' stamp: 'mc 10/29/2018 14:53:42'!
+withParalel: aBlock and: otherBlock 
+
+	| semaphore |
+	
+	semaphore := Semaphore new.
+	[aBlock value. semaphore signal] fork.
+	otherBlock value.
+	semaphore  wait.! !
+
+
+!AccountSummaryWithInvestment methodsFor: 'initialization' stamp: 'mc 10/29/2018 15:03:19'!
+initializeFor: aReceptiveAccount 
+	
+	account := aReceptiveAccount ! !
+
+
+!classDefinition: #AccountSummaryWithAllInvestmentInformation category: #'PortfolioTimeConsuming-Ejercicio'!
+AccountSummaryWithInvestment subclass: #AccountSummaryWithAllInvestmentInformation
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTimeConsuming-Ejercicio'!
+
+!AccountSummaryWithAllInvestmentInformation methodsFor: 'evaluating' stamp: 'mc 10/29/2018 15:06:37'!
+lines 
+
+	| lines investmentEarnings |
+	
+	self withParalel: [investmentEarnings := (InvestmentNetVisitor for: account) value] 
+			and: [lines _ (AccountSummaryWithInvestmentEarnings for: account) lines].
+
+	
+	lines add: 'Inversiones por ', investmentEarnings printString.
+	
+	 ^ lines! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'AccountSummaryWithAllInvestmentInformation class' category: #'PortfolioTimeConsuming-Ejercicio'!
+AccountSummaryWithAllInvestmentInformation class
+	instanceVariableNames: ''!
+
+!AccountSummaryWithAllInvestmentInformation class methodsFor: 'instance creation' stamp: 'HernanWilkinson 7/17/2011 23:56'!
+for: aReceptiveAccount 
+
+	^ self new initializeFor: aReceptiveAccount ! !
+
+
+!classDefinition: #AccountSummaryWithInvestmentEarnings category: #'PortfolioTimeConsuming-Ejercicio'!
+AccountSummaryWithInvestment subclass: #AccountSummaryWithInvestmentEarnings
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTimeConsuming-Ejercicio'!
+
+!AccountSummaryWithInvestmentEarnings methodsFor: 'evaluating' stamp: 'mc 10/29/2018 15:07:31'!
+lines 
+
+	|  lines investmentEarnings |
+	
+	self withParalel:[investmentEarnings _ (InvestmentEarningVisitor for: account) value] and:[lines := (AccountSummary for: account) lines].
+
+	lines add: 'Ganancias por ', investmentEarnings printString .
+	
+	 ^ lines! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'AccountSummaryWithInvestmentEarnings class' category: #'PortfolioTimeConsuming-Ejercicio'!
+AccountSummaryWithInvestmentEarnings class
+	instanceVariableNames: ''!
+
+!AccountSummaryWithInvestmentEarnings class methodsFor: 'instance creation' stamp: 'HernanWilkinson 7/17/2011 23:51'!
+for: aReceptiveAccount 
+
 	^ self new initializeFor: aReceptiveAccount ! !
 
 
