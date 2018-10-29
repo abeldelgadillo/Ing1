@@ -618,43 +618,24 @@ for: aReceptiveAccount
 	^ self new initializeFor: aReceptiveAccount ! !
 
 
-!classDefinition: #AccountSummaryWithInvestment category: #'PortfolioTimeConsuming-Ejercicio'!
-SummaryDescriptor subclass: #AccountSummaryWithInvestment
+!classDefinition: #AccountSummaryWithAllInvestmentInformation category: #'PortfolioTimeConsuming-Ejercicio'!
+SummaryDescriptor subclass: #AccountSummaryWithAllInvestmentInformation
 	instanceVariableNames: 'account'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTimeConsuming-Ejercicio'!
 
-!AccountSummaryWithInvestment methodsFor: 'as yet unclassified' stamp: 'mc 10/29/2018 14:53:42'!
-withParalel: aBlock and: otherBlock 
-
-	| semaphore |
-	
-	semaphore := Semaphore new.
-	[aBlock value. semaphore signal] fork.
-	otherBlock value.
-	semaphore  wait.! !
-
-
-!AccountSummaryWithInvestment methodsFor: 'initialization' stamp: 'mc 10/29/2018 15:03:19'!
+!AccountSummaryWithAllInvestmentInformation methodsFor: 'evaluating' stamp: 'mc 10/29/2018 19:51:49'!
 initializeFor: aReceptiveAccount 
 	
 	account := aReceptiveAccount ! !
 
-
-!classDefinition: #AccountSummaryWithAllInvestmentInformation category: #'PortfolioTimeConsuming-Ejercicio'!
-AccountSummaryWithInvestment subclass: #AccountSummaryWithAllInvestmentInformation
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'PortfolioTimeConsuming-Ejercicio'!
-
-!AccountSummaryWithAllInvestmentInformation methodsFor: 'evaluating' stamp: 'mc 10/29/2018 15:06:37'!
+!AccountSummaryWithAllInvestmentInformation methodsFor: 'evaluating' stamp: 'mc 10/29/2018 19:55:01'!
 lines 
 
 	| lines investmentEarnings |
 	
-	self withParalel: [investmentEarnings := (InvestmentNetVisitor for: account) value] 
+	(ProcessForker new)  withParalel: [investmentEarnings := (InvestmentNetVisitor for: account) value] 
 			and: [lines _ (AccountSummaryWithInvestmentEarnings for: account) lines].
 
 	
@@ -675,18 +656,23 @@ for: aReceptiveAccount
 
 
 !classDefinition: #AccountSummaryWithInvestmentEarnings category: #'PortfolioTimeConsuming-Ejercicio'!
-AccountSummaryWithInvestment subclass: #AccountSummaryWithInvestmentEarnings
-	instanceVariableNames: ''
+SummaryDescriptor subclass: #AccountSummaryWithInvestmentEarnings
+	instanceVariableNames: 'account'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTimeConsuming-Ejercicio'!
 
-!AccountSummaryWithInvestmentEarnings methodsFor: 'evaluating' stamp: 'mc 10/29/2018 15:07:31'!
+!AccountSummaryWithInvestmentEarnings methodsFor: 'evaluating' stamp: 'mc 10/29/2018 19:52:10'!
+initializeFor: aReceptiveAccount 
+	
+	account := aReceptiveAccount ! !
+
+!AccountSummaryWithInvestmentEarnings methodsFor: 'evaluating' stamp: 'mc 10/29/2018 19:54:50'!
 lines 
 
 	|  lines investmentEarnings |
 	
-	self withParalel:[investmentEarnings _ (InvestmentEarningVisitor for: account) value] and:[lines := (AccountSummary for: account) lines].
+	(ProcessForker new) withParalel:[investmentEarnings _ (InvestmentEarningVisitor for: account) value] and:[lines := (AccountSummary for: account) lines].
 
 	lines add: 'Ganancias por ', investmentEarnings printString .
 	
@@ -702,6 +688,24 @@ AccountSummaryWithInvestmentEarnings class
 for: aReceptiveAccount 
 
 	^ self new initializeFor: aReceptiveAccount ! !
+
+
+!classDefinition: #ProcessForker category: #'PortfolioTimeConsuming-Ejercicio'!
+Object subclass: #ProcessForker
+	instanceVariableNames: 'account'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTimeConsuming-Ejercicio'!
+
+!ProcessForker methodsFor: 'paralel' stamp: 'mc 10/29/2018 14:53:42'!
+withParalel: aBlock and: otherBlock 
+
+	| semaphore |
+	
+	semaphore := Semaphore new.
+	[aBlock value. semaphore signal] fork.
+	otherBlock value.
+	semaphore  wait.! !
 
 
 !classDefinition: #ReversePortfolioTreePrinter category: #'PortfolioTimeConsuming-Ejercicio'!
