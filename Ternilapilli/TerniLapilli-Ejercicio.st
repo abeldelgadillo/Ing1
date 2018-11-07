@@ -222,6 +222,33 @@ test11
 		raise:Error.
 ! !
 
+!TerniLapilliTest methodsFor: 'test' stamp: 'A 11/7/2018 16:25:01'!
+test12
+
+	"Jugador X obtiene tres en vertical luego de mover y gana, el juego se termina, no se aceptan mas movimientos"
+	
+	
+	| ternidor  |
+	
+	ternidor _ TerniLapilli newGame.
+	
+	ternidor put:'X' at:(1@1).
+	ternidor put:'O' at:(1@2).
+	ternidor put:'X' at:(2@1).
+	ternidor put:'O' at:(2@2).
+	ternidor put:'X' at:(3@2).
+	ternidor put:'O' at:(3@3).
+
+	ternidor move:'X' from: (3@2) to:(3@1).
+
+	self assert: ternidor isOver.
+	self assert: (ternidor winner) equals:'X'.
+	self should:[ternidor move:'O' from: (2@2) to:(2@3).]
+		raise:Error
+		withExceptionDo: [:error|
+			self assert: error messageText equals: ternidor gameOver .
+			]! !
+
 
 !classDefinition: #TerniLapilli category: #'TerniLapilli-Ejercicio'!
 Object subclass: #TerniLapilli
@@ -229,6 +256,18 @@ Object subclass: #TerniLapilli
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TerniLapilli-Ejercicio'!
+
+!TerniLapilli methodsFor: 'evaluate' stamp: 'A 11/7/2018 15:59:42'!
+hasWon: aChip 
+	
+	^( (board at: 1@1) = aChip and: [(board at: 2@1) = aChip and: [(board at: 3@1) = aChip]] ) or: 
+	[( (board at: 1@2) = aChip and: [(board at: 2@2) = aChip and: [(board at: 3@2) = aChip]] ) or: 
+	[( (board at: 1@3) = aChip and: [(board at: 2@3) = aChip and: [(board at: 3@3) = aChip]] ) or: 
+	[( (board at: 1@1) = aChip and: [(board at: 1@2) = aChip and: [(board at: 1@3) = aChip]] ) or: 
+	[( (board at: 2@1) = aChip and: [(board at: 2@2) = aChip and: [(board at: 2@3) = aChip]] ) or: 
+	[( (board at: 3@1) = aChip and: [(board at: 3@2) = aChip and: [(board at: 3@3) = aChip]] ) or: 
+	[( (board at: 1@1) = aChip and: [(board at: 2@2) = aChip and: [(board at: 3@3) = aChip]] ) or: 
+	[( (board at: 1@3) = aChip and: [(board at: 2@2) = aChip and: [(board at: 3@1) = aChip]] ) ]]]]]]].! !
 
 !TerniLapilli methodsFor: 'evaluate' stamp: 'mc 11/5/2018 14:15:27'!
 isEmpty
@@ -250,20 +289,22 @@ at: aPoint
 
 	^board at: aPoint .! !
 
-!TerniLapilli methodsFor: 'accessing' stamp: 'A 11/5/2018 21:16:38'!
-hasWon: aChip after: aPoint
-
-	^(board at: aPoint = aChip) and: [(board at: aPoint = aChip) and: [board at: aPoint = aChip]].! !
-
-!TerniLapilli methodsFor: 'accessing' stamp: 'A 11/5/2018 20:49:27'!
+!TerniLapilli methodsFor: 'accessing' stamp: 'A 11/7/2018 16:19:53'!
 move: aChip from: fromPoint to: toPoint
 
 	self validateMovefor: aChip  from: fromPoint to: toPoint .
 	board at: fromPoint put: nil.
 	board at: toPoint put: aChip.
-	lastPlayer := aChip.! !
+	lastPlayer := aChip.
+	
+	(self hasWon: aChip) ifTrue: 
+	[
+		gameOver := true.
+		winner := aChip.
+		]
+! !
 
-!TerniLapilli methodsFor: 'accessing' stamp: 'A 11/5/2018 20:58:28'!
+!TerniLapilli methodsFor: 'accessing' stamp: 'A 11/7/2018 16:16:31'!
 put: aChip at: aPoint 
 
 	emptyBoard ifTrue: 
@@ -277,9 +318,15 @@ put: aChip at: aPoint
 		"sino juego"
 	].
 
-		board at: aPoint put: aChip.
-		lastPlayer := aChip.
-		chips _ chips +1.		
+	board at: aPoint put: aChip.
+	lastPlayer := aChip.
+	chips _ chips +1.	
+		
+	(self hasWon: aChip) ifTrue: 
+	[
+		gameOver := true.
+		winner := aChip.
+		]
 ! !
 
 
@@ -312,23 +359,25 @@ positionAlreadyTakenErrorMessage
 	^'La posicion ya se encuentra ocupada'.! !
 
 
-!TerniLapilli methodsFor: 'private' stamp: 'A 11/5/2018 20:50:56'!
+!TerniLapilli methodsFor: 'private' stamp: 'A 11/7/2018 16:25:50'!
 validateMovefor: aChip from: fromPoint to: toPoint
 
 	(board at: toPoint) ifNotNil: [self error: self cantMoveToPositionAlreadyTaken.].
-	lastPlayer = aChip ifTrue: [self error: self cantMoveTwice.].! !
+	lastPlayer = aChip ifTrue: [self error: self cantMoveTwice.].
+	gameOver ifTrue:[ self error: self gameOver].! !
 
-!TerniLapilli methodsFor: 'private' stamp: 'A 11/5/2018 20:48:17'!
+!TerniLapilli methodsFor: 'private' stamp: 'A 11/7/2018 16:26:28'!
 validatePutfor: aChip and: aPoint
 
-	"Control plays other player"
+		"si termino no aceptar mas movimientos"
+		gameOver ifTrue:[ self error: self gameOver].
+		"Control plays other player"
 		lastPlayer = aChip ifTrue: [self error: self playerCantPlayTwiceInARowErrorMessage ].
 		"Cant put in a occupied slot (?)"
 		(board at: aPoint) ifNotNil: [self error: self positionAlreadyTakenErrorMessage ].
 		"tablero lleno"
 		chips = 6 ifTrue:[self error: self cantFitMoreChips].
-		"si termino no aceptar mas movimientos"
-		gameOver ifTrue:[ self error: self gameOver].! !
+! !
 
 
 !TerniLapilli methodsFor: 'initialize' stamp: 'A 11/5/2018 20:58:37'!
