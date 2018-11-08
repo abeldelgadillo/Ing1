@@ -401,15 +401,13 @@ safeMove: aChip  from: fromPoint to: toPoint
 	lastPlayer := aChip.
 	self controlIfLastMoveWins.! !
 
-!TerniLapilli methodsFor: 'safe move' stamp: 'mc 11/8/2018 02:36:36'!
+!TerniLapilli methodsFor: 'safe move' stamp: 'A 11/8/2018 15:01:56'!
 safePut: aChip  on: aPoint
  
 	board at: aPoint put: aChip.
 	lastPlayer := aChip.
 	chips _ chips +1.
-	" esto no se si deberia estar aca deberia manejarlo el state "
 	chips = 6 ifTrue: [state _ TerniLapilliMovingState new].
-	" esto seguro que lo deberia manejar el estado"
 	self controlIfLastMoveWins.! !
 
 !TerniLapilli methodsFor: 'safe move' stamp: 'mc 11/8/2018 02:32:44'!
