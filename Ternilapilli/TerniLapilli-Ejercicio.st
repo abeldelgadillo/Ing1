@@ -170,7 +170,7 @@ test09
 			self assert: error messageText equals: ternidor cantMoveToPositionAlreadyTaken .
 			]! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'A 11/5/2018 20:13:37'!
+!TerniLapilliTest methodsFor: 'test' stamp: 'mc 11/8/2018 00:39:34'!
 test10
 
 	"Jugador no puede mover dos veces"
@@ -197,7 +197,7 @@ test10
 		should: [ternidor  move:'X' from:from to:to.]
 		raise: Error
 		withExceptionDo: [:error|
-			self assert: error messageText equals: ternidor cantMoveTwice .
+			self assert: error messageText equals: ternidor playerCantPlayTwiceInARowErrorMessage .
 			]! !
 
 !TerniLapilliTest methodsFor: 'test' stamp: 'A 11/5/2018 20:36:45'!
@@ -252,7 +252,7 @@ test12
 
 !classDefinition: #TerniLapilli category: #'TerniLapilli-Ejercicio'!
 Object subclass: #TerniLapilli
-	instanceVariableNames: 'board emptyBoard xs lastPlayer chips gameOver winner state'
+	instanceVariableNames: 'board lastPlayer chips winner state'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TerniLapilli-Ejercicio'!
@@ -269,14 +269,14 @@ hasWon: aChip
 	[( (board at: 1@1) = aChip and: [(board at: 2@2) = aChip and: [(board at: 3@3) = aChip]] ) or: 
 	[( (board at: 1@3) = aChip and: [(board at: 2@2) = aChip and: [(board at: 3@1) = aChip]] ) ]]]]]]].! !
 
-!TerniLapilli methodsFor: 'evaluate' stamp: 'mc 11/5/2018 14:15:27'!
+!TerniLapilli methodsFor: 'evaluate' stamp: 'mc 11/8/2018 00:44:44'!
 isEmpty
-	^emptyBoard .! !
+	^state isEmpty .! !
 
-!TerniLapilli methodsFor: 'evaluate' stamp: 'A 11/5/2018 20:38:39'!
+!TerniLapilli methodsFor: 'evaluate' stamp: 'mc 11/8/2018 00:44:53'!
 isOver
 
-	^gameOver! !
+	^state isOver! !
 
 !TerniLapilli methodsFor: 'evaluate' stamp: 'A 11/5/2018 20:38:56'!
 winner
@@ -345,11 +345,6 @@ cantMoveToPositionAlreadyTaken
 
 	^'No se puede mover a una posición ya ocupada.'! !
 
-!TerniLapilli methodsFor: 'error' stamp: 'A 11/5/2018 20:18:32'!
-cantMoveTwice
-	
-		^'Jugador no puede mover dos veces seguidas.'! !
-
 !TerniLapilli methodsFor: 'error' stamp: 'A 11/5/2018 20:44:56'!
 gameOver
 
@@ -387,10 +382,10 @@ validatePutfor: aChip and: aPoint
 
 ! !
 
-!TerniLapilli methodsFor: 'private' stamp: 'mc 11/7/2018 22:46:46'!
+!TerniLapilli methodsFor: 'private' stamp: 'mc 11/8/2018 00:39:12'!
 validateTurnFor: aChip
 
-	lastPlayer = aChip ifTrue: [self error: self cantMoveTwice.]! !
+	lastPlayer = aChip ifTrue: [self error: self playerCantPlayTwiceInARowErrorMessage.]! !
 
 
 !TerniLapilli methodsFor: 'initialize' stamp: 'mc 11/7/2018 20:12:56'!
@@ -446,6 +441,16 @@ Object subclass: #TerniLapilliState
 	poolDictionaries: ''
 	category: 'TerniLapilli-Ejercicio'!
 
+!TerniLapilliState methodsFor: 'as yet unclassified' stamp: 'mc 11/8/2018 00:46:49'!
+isEmpty
+
+	^false! !
+
+!TerniLapilliState methodsFor: 'as yet unclassified' stamp: 'mc 11/8/2018 00:46:05'!
+isOver
+
+	^false! !
+
 
 !classDefinition: #TerniLapilliMovingState category: #'TerniLapilli-Ejercicio'!
 TerniLapilliState subclass: #TerniLapilliMovingState
@@ -473,15 +478,20 @@ TerniLapilliState subclass: #TerniLapilliOverState
 	poolDictionaries: ''
 	category: 'TerniLapilli-Ejercicio'!
 
-!TerniLapilliOverState methodsFor: 'as yet unclassified' stamp: 'mc 11/7/2018 22:30:54'!
+!TerniLapilliOverState methodsFor: 'as yet unclassified' stamp: 'mc 11/8/2018 00:46:25'!
+isOver
+
+	^true.! !
+
+!TerniLapilliOverState methodsFor: 'as yet unclassified' stamp: 'mc 11/8/2018 01:01:06'!
 move: aChip from: fromPoint to: toPoint on: aTerniLapilli 
 	
-	self error: self gameOver! !
+	self error: aTerniLapilli gameOver! !
 
-!TerniLapilliOverState methodsFor: 'as yet unclassified' stamp: 'mc 11/7/2018 22:31:02'!
+!TerniLapilliOverState methodsFor: 'as yet unclassified' stamp: 'mc 11/8/2018 01:01:10'!
 put: aChip at: aPoint on: aTerniLapilli
 
-	self error: self gameOver! !
+	self error: aTerniLapilli gameOver! !
 
 
 !classDefinition: #TerniLapilliStartState category: #'TerniLapilli-Ejercicio'!
@@ -490,6 +500,11 @@ TerniLapilliState subclass: #TerniLapilliStartState
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TerniLapilli-Ejercicio'!
+
+!TerniLapilliStartState methodsFor: 'as yet unclassified' stamp: 'mc 11/8/2018 00:47:16'!
+isEmpty
+
+	^true.! !
 
 !TerniLapilliStartState methodsFor: 'as yet unclassified' stamp: 'mc 11/7/2018 22:20:04'!
 put: aChip at: aPoint on: aTerniLapilli
@@ -506,32 +521,8 @@ TerniLapilliState subclass: #TerniLapilliVacantState
 	poolDictionaries: ''
 	category: 'TerniLapilli-Ejercicio'!
 
-!TerniLapilliVacantState methodsFor: 'as yet unclassified' stamp: 'mc 11/7/2018 22:21:29'!
+!TerniLapilliVacantState methodsFor: 'as yet unclassified' stamp: 'mc 11/8/2018 01:01:36'!
 put: aChip at: aPoint on: aTerniLapilli
 
 	aTerniLapilli validatePutfor: aChip and: aPoint.
-	aTerniLapilli xxx: aChip put: aPoint.
-	
-
-"
-	emptyBoard ifTrue: 
-	[
-		-first Play-
-		emptyBoard _ false.
-	] ifFalse: 
-	[
-		self validatePutfor: aChip and: aPoint .
-		
-		-sino juego-
-	].
-
-	board at: aPoint put: aChip.
-	lastPlayer := aChip.
-	chips _ chips +1.	
-		
-	(self hasWon: aChip) ifTrue: 
-	[
-		gameOver := true.
-		winner := aChip.
-		]
-"! !
+	aTerniLapilli xxx: aChip put: aPoint.! !
