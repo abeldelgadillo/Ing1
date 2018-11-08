@@ -47,10 +47,10 @@ test03
 			self assert: error messageText equals: ternidor playerCantPlayTwiceInARowErrorMessage .
 			]! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'A 11/5/2018 18:45:28'!
+!TerniLapilliTest methodsFor: 'test' stamp: 'mc 11/8/2018 01:41:01'!
 test04
 
-	"Juegan X y luego O"
+	"Juegan X y luego O y todo esta bien"
 	
 	| ternidor |
 	
@@ -64,10 +64,10 @@ test04
 	self assert: (ternidor at:(2@1)) equals: 'O'.
 ! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'A 11/5/2018 19:23:50'!
+!TerniLapilliTest methodsFor: 'test' stamp: 'mc 11/8/2018 01:41:12'!
 test05
 
-	"Juegan X y luego O quiere jugar en la misma posicion que X"
+	"Juegan X y luego O quiere jugar en la misma posicion que X error"
 	
 	| ternidor |
 	
@@ -79,13 +79,13 @@ test05
 		should: [ternidor put:'O' at:(1@1).]
 		raise: Error
 		withExceptionDo: [:error|
-			self assert: error messageText equals: ternidor positionAlreadyTakenErrorMessage.
+			self assert: error messageText equals: ternidor cantPutIntoAPositionAlreadyTakenErrorMessage.
 			]! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'A 11/5/2018 19:31:52'!
+!TerniLapilliTest methodsFor: 'test' stamp: 'mc 11/8/2018 01:41:40'!
 test06
 
-	" Poner en una posicion no valida deberia tirar un error (alguno) "
+	" Poner en una posicion no valida deberia tirar un error, no deberia dejar "
 	
 	| ternidor |
 	
@@ -95,7 +95,7 @@ test06
 		should: [ternidor put:'O' at:(4@1).]
 		raise: Error.! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'A 11/5/2018 19:45:14'!
+!TerniLapilliTest methodsFor: 'test' stamp: 'mc 11/8/2018 01:14:53'!
 test07
 
 	"cuando ya tengo tres fichas de cada uno no puedo poner mas"
@@ -116,7 +116,7 @@ test07
 		should: [ternidor put:'X' at:(3@3)]
 		raise: Error
 		withExceptionDo: [:error|
-			self assert: error messageText equals: ternidor cantFitMoreChips .
+			self assert: error messageText equals: ternidor notMoreChipsErrorMessage .
 			]! !
 
 !TerniLapilliTest methodsFor: 'test' stamp: 'A 11/5/2018 19:57:26'!
@@ -143,10 +143,35 @@ test08
 	self assert: (ternidor at: from) equals: nil.
 	self assert: (ternidor at: to) equals: 'X'.! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'A 11/5/2018 20:01:39'!
+!TerniLapilliTest methodsFor: 'test' stamp: 'mc 11/8/2018 01:46:15'!
 test09
 
-	"muevo a una posicion ya ocupada"
+	"cuando menos de tres fichas de cada no puedo mover"
+	
+	
+	| ternidor  from to |
+	
+	ternidor _ TerniLapilli newGame.
+	
+	ternidor put:'X' at:(1@1).
+	ternidor put:'O' at:(2@1).
+
+	
+	from _ (3@1).
+	to _ (3@2).
+	
+
+	self 
+		should: [ternidor  move:'X' from:from to:to.]
+		raise: Error
+		withExceptionDo: [
+			:error | self assert: error messageText equals: ternidor notEnoughChipsToStartMoveErrorMessage.
+			]! !
+
+!TerniLapilliTest methodsFor: 'test' stamp: 'mc 11/8/2018 01:43:01'!
+test10
+
+	"muevo a una posicion ya ocupada debe dar error"
 	
 	
 	| ternidor  from to |
@@ -167,11 +192,11 @@ test09
 		should: [ternidor  move:'X' from:from to:to.]
 		raise: Error
 		withExceptionDo: [:error|
-			self assert: error messageText equals: ternidor cantMoveToPositionAlreadyTaken .
+			self assert: error messageText equals: ternidor cantMoveToPositionAlreadyTakenErrorMessage .
 			]! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'mc 11/8/2018 00:39:34'!
-test10
+!TerniLapilliTest methodsFor: 'test' stamp: 'mc 11/8/2018 01:42:54'!
+test11
 
 	"Jugador no puede mover dos veces"
 	
@@ -200,8 +225,8 @@ test10
 			self assert: error messageText equals: ternidor playerCantPlayTwiceInARowErrorMessage .
 			]! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'A 11/5/2018 20:36:45'!
-test11
+!TerniLapilliTest methodsFor: 'test' stamp: 'mc 11/8/2018 01:42:46'!
+test12
 
 	"pone tres en vertical gana, el juego se termina, no se aceptan mas movimientos"
 	
@@ -222,8 +247,8 @@ test11
 		raise:Error.
 ! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'A 11/7/2018 16:25:01'!
-test12
+!TerniLapilliTest methodsFor: 'test' stamp: 'mc 11/8/2018 01:42:32'!
+test13
 
 	"Jugador X obtiene tres en vertical luego de mover y gana, el juego se termina, no se aceptan mas movimientos"
 	
@@ -246,7 +271,7 @@ test12
 	self should:[ternidor move:'O' from: (2@2) to:(2@3).]
 		raise:Error
 		withExceptionDo: [:error|
-			self assert: error messageText equals: ternidor gameOver .
+			self assert: error messageText equals: ternidor gameOverNoMorePlaysErrorMessage .
 			]! !
 
 
@@ -257,17 +282,10 @@ Object subclass: #TerniLapilli
 	poolDictionaries: ''
 	category: 'TerniLapilli-Ejercicio'!
 
-!TerniLapilli methodsFor: 'evaluate' stamp: 'A 11/7/2018 15:59:42'!
+!TerniLapilli methodsFor: 'evaluate' stamp: 'mc 11/8/2018 02:17:55'!
 hasWon: aChip 
 	
-	^( (board at: 1@1) = aChip and: [(board at: 2@1) = aChip and: [(board at: 3@1) = aChip]] ) or: 
-	[( (board at: 1@2) = aChip and: [(board at: 2@2) = aChip and: [(board at: 3@2) = aChip]] ) or: 
-	[( (board at: 1@3) = aChip and: [(board at: 2@3) = aChip and: [(board at: 3@3) = aChip]] ) or: 
-	[( (board at: 1@1) = aChip and: [(board at: 1@2) = aChip and: [(board at: 1@3) = aChip]] ) or: 
-	[( (board at: 2@1) = aChip and: [(board at: 2@2) = aChip and: [(board at: 2@3) = aChip]] ) or: 
-	[( (board at: 3@1) = aChip and: [(board at: 3@2) = aChip and: [(board at: 3@3) = aChip]] ) or: 
-	[( (board at: 1@1) = aChip and: [(board at: 2@2) = aChip and: [(board at: 3@3) = aChip]] ) or: 
-	[( (board at: 1@3) = aChip and: [(board at: 2@2) = aChip and: [(board at: 3@1) = aChip]] ) ]]]]]]].! !
+	^(self controlVerticalLinesFor: aChip) or:[(self controlHorizontalLinesFor: aChip) or:[self controlDiagonalsFor: aChip].] ! !
 
 !TerniLapilli methodsFor: 'evaluate' stamp: 'mc 11/8/2018 00:44:44'!
 isEmpty
@@ -284,81 +302,74 @@ winner
 	^winner.! !
 
 
-!TerniLapilli methodsFor: 'accessing' stamp: 'A 11/5/2018 18:46:12'!
-at: aPoint
+!TerniLapilli methodsFor: 'accessing' stamp: 'mc 11/8/2018 01:49:09'!
+at: aPoint 
 
-	^board at: aPoint .! !
+	^board at: aPoint.! !
 
-!TerniLapilli methodsFor: 'accessing' stamp: 'mc 11/7/2018 22:45:19'!
+
+!TerniLapilli methodsFor: 'play' stamp: 'mc 11/8/2018 01:52:30'!
 move: aChip from: fromPoint to: toPoint
 
 	self validateTurnFor: aChip.
-	state move: aChip from: fromPoint to: toPoint  on: self.
-	"
-	self validateMovefor: aChip  from: fromPoint to: toPoint .
-	board at: fromPoint put: nil.
-	board at: toPoint put: aChip.
-	lastPlayer := aChip.
-	
-	(self hasWon: aChip) ifTrue: 
-	[
-		gameOver := true.
-		winner := aChip.
-		]
-"! !
+	state move: aChip from: fromPoint to: toPoint  on: self.! !
 
-!TerniLapilli methodsFor: 'accessing' stamp: 'mc 11/7/2018 22:45:46'!
+!TerniLapilli methodsFor: 'play' stamp: 'mc 11/8/2018 01:52:23'!
 put: aChip at: aPoint 
 
 	self validateTurnFor: aChip.
-	state put: aChip  at: aPoint on: self. 
-	"
-	emptyBoard ifTrue: 
-	[
-		-first Play-
-		emptyBoard _ false.
-	] ifFalse: 
-	[
-		self validatePutfor: aChip and: aPoint .
-		
-		-sino juego-
-	].
-
-	board at: aPoint put: aChip.
-	lastPlayer := aChip.
-	chips _ chips +1.	
-		
-	(self hasWon: aChip) ifTrue: 
-	[
-		gameOver := true.
-		winner := aChip.
-		]
-"! !
+	state put: aChip  at: aPoint on: self. ! !
 
 
-!TerniLapilli methodsFor: 'error' stamp: 'A 11/5/2018 19:39:29'!
-cantFitMoreChips
-	^'Los jugadores no pueden colocar mas fichas, ahora deben mover'.! !
-
-!TerniLapilli methodsFor: 'error' stamp: 'A 11/5/2018 20:04:24'!
-cantMoveToPositionAlreadyTaken
+!TerniLapilli methodsFor: 'error' stamp: 'mc 11/8/2018 01:19:00'!
+cantMoveToPositionAlreadyTakenErrorMessage
 
 	^'No se puede mover a una posición ya ocupada.'! !
 
-!TerniLapilli methodsFor: 'error' stamp: 'A 11/5/2018 20:44:56'!
-gameOver
+!TerniLapilli methodsFor: 'error' stamp: 'mc 11/8/2018 01:22:49'!
+cantPutIntoAPositionAlreadyTakenErrorMessage
 
-	^'El juego termino'.! !
+	^'No se puede poner una fucha en una posicion ya ocupada'.! !
+
+!TerniLapilli methodsFor: 'error' stamp: 'mc 11/8/2018 01:23:40'!
+gameOverNoMorePlaysErrorMessage
+
+	^'El juego termino, no se permiten mas jugadas'.! !
+
+!TerniLapilli methodsFor: 'error' stamp: 'mc 11/8/2018 01:45:25'!
+notEnoughChipsToStartMoveErrorMessage
+
+	^'No se tienen la cantidad de fichas necesarias para empezar a mover'.! !
+
+!TerniLapilli methodsFor: 'error' stamp: 'mc 11/8/2018 01:14:10'!
+notMoreChipsErrorMessage
+
+	^'Los jugadores no pueden colocar mas fichas, ahora deben mover'.! !
 
 !TerniLapilli methodsFor: 'error' stamp: 'A 11/5/2018 19:22:59'!
 playerCantPlayTwiceInARowErrorMessage
 	^'El jugador no puede jugar dos veces seguidas'.! !
 
-!TerniLapilli methodsFor: 'error' stamp: 'A 11/5/2018 19:22:10'!
-positionAlreadyTakenErrorMessage
 
-	^'La posicion ya se encuentra ocupada'.! !
+!TerniLapilli methodsFor: 'private' stamp: 'mc 11/8/2018 02:17:11'!
+controlDiagonalsFor: aChip
 
+	^((board at: 1 @1 ) = aChip and: [(board at: 2 @2 ) = aChip and: [(board at: 3 @3 ) = aChip]]) 
+		or:[(board at: 1 @3 ) = aChip and: [(board at: 2 @2 ) = aChip and: [(board at: 3 @1 ) = aChip]]].! !
+
+!TerniLapilli methodsFor: 'private' stamp: 'mc 11/8/2018 02:29:50'!
+controlHorizontalLineFor: aChip on: i
+
+	^(board at: i @1 ) = aChip and: [(board at: i @2 ) = aChip and: [(board at: i @3 ) = aChip]] .! !
+
+!TerniLapilli methodsFor: 'private' stamp: 'mc 11/8/2018 02:10:03'!
+controlHorizontalLinesFor: aChip
+
+	^(self controlHorizontalLineFor: aChip on:1) 
+		or: [
+			(self controlHorizontalLineFor: aChip on:2) 
+				or:[self controlHorizontalLineFor: aChip on:3].
+				].! !
 
 !TerniLapilli methodsFor: 'private' stamp: 'mc 11/7/2018 22:32:20'!
 controlIfLastMoveWins
@@ -369,16 +380,30 @@ controlIfLastMoveWins
 		winner := lastPlayer .
 		]! !
 
-!TerniLapilli methodsFor: 'private' stamp: 'mc 11/7/2018 22:46:41'!
+!TerniLapilli methodsFor: 'private' stamp: 'mc 11/8/2018 02:29:24'!
+controlVerticalLineFor: aChip on: j
+
+	^(board at: 1@j ) = aChip and: [(board at: 2@j ) = aChip and: [(board at: 3@j ) = aChip]] .! !
+
+!TerniLapilli methodsFor: 'private' stamp: 'mc 11/8/2018 02:09:39'!
+controlVerticalLinesFor: aChip
+
+	^(self controlVerticalLineFor: aChip on:1) 
+		or: [
+			(self controlVerticalLineFor: aChip on:2) 
+				or:[self controlVerticalLineFor: aChip on:3].
+				].! !
+
+!TerniLapilli methodsFor: 'private' stamp: 'mc 11/8/2018 01:19:00'!
 validateMovefor: aChip from: fromPoint to: toPoint
 
-	(board at: toPoint) ifNotNil: [self error: self cantMoveToPositionAlreadyTaken.].! !
+	(board at: toPoint) ifNotNil: [self error: self cantMoveToPositionAlreadyTakenErrorMessage.].! !
 
-!TerniLapilli methodsFor: 'private' stamp: 'mc 11/7/2018 22:35:30'!
+!TerniLapilli methodsFor: 'private' stamp: 'mc 11/8/2018 01:22:04'!
 validatePutfor: aChip and: aPoint
 
 		"Cant put in a occupied slot (?)"
-		(board at: aPoint) ifNotNil: [self error: self positionAlreadyTakenErrorMessage ].
+		(board at: aPoint) ifNotNil: [self error: self cantPutIntoAPositionAlreadyTakenErrorMessage ].
 
 ! !
 
@@ -388,39 +413,37 @@ validateTurnFor: aChip
 	lastPlayer = aChip ifTrue: [self error: self playerCantPlayTwiceInARowErrorMessage.]! !
 
 
-!TerniLapilli methodsFor: 'initialize' stamp: 'mc 11/7/2018 20:12:56'!
+!TerniLapilli methodsFor: 'initialize' stamp: 'mc 11/8/2018 01:29:55'!
 initialize
 
 	board _ Array2D height: 3 width:3. 
-	emptyBoard _ true.
-	gameOver _ false.
 	chips := 0.
 	state _ TerniLapilliStartState new.! !
 
 
-!TerniLapilli methodsFor: 'as yet unclassified' stamp: 'mc 11/7/2018 20:24:39'!
-changeToOccupy
-
-	emptyBoard _ false.
-	state _ TerniLapilliVacantState new.! !
-
-!TerniLapilli methodsFor: 'as yet unclassified' stamp: 'mc 11/7/2018 22:19:11'!
-mxxx: aChip  from: fromPoint to: toPoint
+!TerniLapilli methodsFor: 'safe move' stamp: 'mc 11/8/2018 02:36:53'!
+safeMove: aChip  from: fromPoint to: toPoint
  
 	board at: fromPoint put: nil.
 	board at: toPoint put: aChip.
 	lastPlayer := aChip.
 	self controlIfLastMoveWins.! !
 
-!TerniLapilli methodsFor: 'as yet unclassified' stamp: 'mc 11/7/2018 22:19:30'!
-xxx: aChip  put: aPoint
+!TerniLapilli methodsFor: 'safe move' stamp: 'mc 11/8/2018 02:36:36'!
+safePut: aChip  on: aPoint
  
 	board at: aPoint put: aChip.
 	lastPlayer := aChip.
 	chips _ chips +1.
 	" esto no se si deberia estar aca deberia manejarlo el state "
 	chips = 6 ifTrue: [state _ TerniLapilliMovingState new].
+	" esto seguro que lo deberia manejar el estado"
 	self controlIfLastMoveWins.! !
+
+!TerniLapilli methodsFor: 'safe move' stamp: 'mc 11/8/2018 02:32:44'!
+setState: newState
+
+	state _ newState.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -451,6 +474,16 @@ isOver
 
 	^false! !
 
+!TerniLapilliState methodsFor: 'as yet unclassified' stamp: 'mc 11/8/2018 01:11:00'!
+move: aChip from: fromPoint to: toPoint on: aTerniLapilli 
+	
+	self subclassResponsibility .! !
+
+!TerniLapilliState methodsFor: 'as yet unclassified' stamp: 'mc 11/8/2018 01:11:18'!
+put: aChip at: aPoint on: aTerniLapilli
+
+	self subclassResponsibility.! !
+
 
 !classDefinition: #TerniLapilliMovingState category: #'TerniLapilli-Ejercicio'!
 TerniLapilliState subclass: #TerniLapilliMovingState
@@ -459,16 +492,16 @@ TerniLapilliState subclass: #TerniLapilliMovingState
 	poolDictionaries: ''
 	category: 'TerniLapilli-Ejercicio'!
 
-!TerniLapilliMovingState methodsFor: 'as yet unclassified' stamp: 'mc 11/7/2018 21:36:55'!
+!TerniLapilliMovingState methodsFor: 'as yet unclassified' stamp: 'mc 11/8/2018 02:37:34'!
 move: aChip from: fromPoint to: toPoint on: aTerniLapilli 
 	
 	aTerniLapilli validateMovefor: aChip  from:  fromPoint to: toPoint.
-	aTerniLapilli  mxxx: aChip from: fromPoint to: toPoint.! !
+	aTerniLapilli  safeMove: aChip from: fromPoint to: toPoint.! !
 
-!TerniLapilliMovingState methodsFor: 'as yet unclassified' stamp: 'mc 11/7/2018 20:44:40'!
+!TerniLapilliMovingState methodsFor: 'as yet unclassified' stamp: 'mc 11/8/2018 01:14:44'!
 put: aChip at: aPoint on: aTerniLapilli
 
-	self error: aTerniLapilli cantFitMoreChips! !
+	self error: aTerniLapilli notMoreChipsErrorMessage! !
 
 
 !classDefinition: #TerniLapilliOverState category: #'TerniLapilli-Ejercicio'!
@@ -483,15 +516,15 @@ isOver
 
 	^true.! !
 
-!TerniLapilliOverState methodsFor: 'as yet unclassified' stamp: 'mc 11/8/2018 01:01:06'!
+!TerniLapilliOverState methodsFor: 'as yet unclassified' stamp: 'mc 11/8/2018 01:23:27'!
 move: aChip from: fromPoint to: toPoint on: aTerniLapilli 
 	
-	self error: aTerniLapilli gameOver! !
+	self error: aTerniLapilli gameOverNoMorePlaysErrorMessage! !
 
-!TerniLapilliOverState methodsFor: 'as yet unclassified' stamp: 'mc 11/8/2018 01:01:10'!
+!TerniLapilliOverState methodsFor: 'as yet unclassified' stamp: 'mc 11/8/2018 01:23:27'!
 put: aChip at: aPoint on: aTerniLapilli
 
-	self error: aTerniLapilli gameOver! !
+	self error: aTerniLapilli gameOverNoMorePlaysErrorMessage! !
 
 
 !classDefinition: #TerniLapilliStartState category: #'TerniLapilli-Ejercicio'!
@@ -506,12 +539,17 @@ isEmpty
 
 	^true.! !
 
-!TerniLapilliStartState methodsFor: 'as yet unclassified' stamp: 'mc 11/7/2018 22:20:04'!
+!TerniLapilliStartState methodsFor: 'as yet unclassified' stamp: 'mc 11/8/2018 01:36:17'!
+move: aChip from: fromPoint to: toPoint on: aTerniLapilli 
+	
+	self error: aTerniLapilli notEnoughChipsToStartMoveErrorMessage.! !
+
+!TerniLapilliStartState methodsFor: 'as yet unclassified' stamp: 'mc 11/8/2018 02:38:13'!
 put: aChip at: aPoint on: aTerniLapilli
 
 	
-	aTerniLapilli xxx: aChip put: aPoint.
-	aTerniLapilli changeToOccupy.! !
+	aTerniLapilli safePut: aChip on: aPoint.
+	aTerniLapilli setState: TerniLapilliVacantState  new.! !
 
 
 !classDefinition: #TerniLapilliVacantState category: #'TerniLapilli-Ejercicio'!
@@ -521,8 +559,13 @@ TerniLapilliState subclass: #TerniLapilliVacantState
 	poolDictionaries: ''
 	category: 'TerniLapilli-Ejercicio'!
 
-!TerniLapilliVacantState methodsFor: 'as yet unclassified' stamp: 'mc 11/8/2018 01:01:36'!
+!TerniLapilliVacantState methodsFor: 'as yet unclassified' stamp: 'mc 11/8/2018 01:36:39'!
+move: aChip from: fromPoint to: toPoint on: aTerniLapilli 
+	
+	self error: aTerniLapilli notEnoughChipsToStartMoveErrorMessage.! !
+
+!TerniLapilliVacantState methodsFor: 'as yet unclassified' stamp: 'mc 11/8/2018 02:36:07'!
 put: aChip at: aPoint on: aTerniLapilli
 
 	aTerniLapilli validatePutfor: aChip and: aPoint.
-	aTerniLapilli xxx: aChip put: aPoint.! !
+	aTerniLapilli safePut: aChip on: aPoint.! !
