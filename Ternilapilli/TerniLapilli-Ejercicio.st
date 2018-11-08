@@ -252,7 +252,7 @@ test12
 
 !classDefinition: #TerniLapilli category: #'TerniLapilli-Ejercicio'!
 Object subclass: #TerniLapilli
-	instanceVariableNames: 'board emptyBoard xs lastPlayer chips gameOver winner'
+	instanceVariableNames: 'board emptyBoard xs lastPlayer chips gameOver winner state'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TerniLapilli-Ejercicio'!
@@ -289,9 +289,12 @@ at: aPoint
 
 	^board at: aPoint .! !
 
-!TerniLapilli methodsFor: 'accessing' stamp: 'A 11/7/2018 16:19:53'!
+!TerniLapilli methodsFor: 'accessing' stamp: 'mc 11/7/2018 22:45:19'!
 move: aChip from: fromPoint to: toPoint
 
+	self validateTurnFor: aChip.
+	state move: aChip from: fromPoint to: toPoint  on: self.
+	"
 	self validateMovefor: aChip  from: fromPoint to: toPoint .
 	board at: fromPoint put: nil.
 	board at: toPoint put: aChip.
@@ -302,20 +305,23 @@ move: aChip from: fromPoint to: toPoint
 		gameOver := true.
 		winner := aChip.
 		]
-! !
+"! !
 
-!TerniLapilli methodsFor: 'accessing' stamp: 'A 11/7/2018 16:16:31'!
+!TerniLapilli methodsFor: 'accessing' stamp: 'mc 11/7/2018 22:45:46'!
 put: aChip at: aPoint 
 
+	self validateTurnFor: aChip.
+	state put: aChip  at: aPoint on: self. 
+	"
 	emptyBoard ifTrue: 
 	[
-		"first Play"
+		-first Play-
 		emptyBoard _ false.
 	] ifFalse: 
 	[
 		self validatePutfor: aChip and: aPoint .
 		
-		"sino juego"
+		-sino juego-
 	].
 
 	board at: aPoint put: aChip.
@@ -327,7 +333,7 @@ put: aChip at: aPoint
 		gameOver := true.
 		winner := aChip.
 		]
-! !
+"! !
 
 
 !TerniLapilli methodsFor: 'error' stamp: 'A 11/5/2018 19:39:29'!
@@ -359,34 +365,67 @@ positionAlreadyTakenErrorMessage
 	^'La posicion ya se encuentra ocupada'.! !
 
 
-!TerniLapilli methodsFor: 'private' stamp: 'A 11/7/2018 16:25:50'!
+!TerniLapilli methodsFor: 'private' stamp: 'mc 11/7/2018 22:32:20'!
+controlIfLastMoveWins
+
+	(self hasWon: lastPlayer ) ifTrue: 
+	[
+		state _ TerniLapilliOverState new.
+		winner := lastPlayer .
+		]! !
+
+!TerniLapilli methodsFor: 'private' stamp: 'mc 11/7/2018 22:46:41'!
 validateMovefor: aChip from: fromPoint to: toPoint
 
-	(board at: toPoint) ifNotNil: [self error: self cantMoveToPositionAlreadyTaken.].
-	lastPlayer = aChip ifTrue: [self error: self cantMoveTwice.].
-	gameOver ifTrue:[ self error: self gameOver].! !
+	(board at: toPoint) ifNotNil: [self error: self cantMoveToPositionAlreadyTaken.].! !
 
-!TerniLapilli methodsFor: 'private' stamp: 'A 11/7/2018 16:26:28'!
+!TerniLapilli methodsFor: 'private' stamp: 'mc 11/7/2018 22:35:30'!
 validatePutfor: aChip and: aPoint
 
-		"si termino no aceptar mas movimientos"
-		gameOver ifTrue:[ self error: self gameOver].
-		"Control plays other player"
-		lastPlayer = aChip ifTrue: [self error: self playerCantPlayTwiceInARowErrorMessage ].
 		"Cant put in a occupied slot (?)"
 		(board at: aPoint) ifNotNil: [self error: self positionAlreadyTakenErrorMessage ].
-		"tablero lleno"
-		chips = 6 ifTrue:[self error: self cantFitMoreChips].
+
 ! !
 
+!TerniLapilli methodsFor: 'private' stamp: 'mc 11/7/2018 22:46:46'!
+validateTurnFor: aChip
 
-!TerniLapilli methodsFor: 'initialize' stamp: 'A 11/5/2018 20:58:37'!
+	lastPlayer = aChip ifTrue: [self error: self cantMoveTwice.]! !
+
+
+!TerniLapilli methodsFor: 'initialize' stamp: 'mc 11/7/2018 20:12:56'!
 initialize
 
 	board _ Array2D height: 3 width:3. 
 	emptyBoard _ true.
 	gameOver _ false.
-	chips := 0.! !
+	chips := 0.
+	state _ TerniLapilliStartState new.! !
+
+
+!TerniLapilli methodsFor: 'as yet unclassified' stamp: 'mc 11/7/2018 20:24:39'!
+changeToOccupy
+
+	emptyBoard _ false.
+	state _ TerniLapilliVacantState new.! !
+
+!TerniLapilli methodsFor: 'as yet unclassified' stamp: 'mc 11/7/2018 22:19:11'!
+mxxx: aChip  from: fromPoint to: toPoint
+ 
+	board at: fromPoint put: nil.
+	board at: toPoint put: aChip.
+	lastPlayer := aChip.
+	self controlIfLastMoveWins.! !
+
+!TerniLapilli methodsFor: 'as yet unclassified' stamp: 'mc 11/7/2018 22:19:30'!
+xxx: aChip  put: aPoint
+ 
+	board at: aPoint put: aChip.
+	lastPlayer := aChip.
+	chips _ chips +1.
+	" esto no se si deberia estar aca deberia manejarlo el state "
+	chips = 6 ifTrue: [state _ TerniLapilliMovingState new].
+	self controlIfLastMoveWins.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -398,3 +437,101 @@ TerniLapilli class
 newGame
 	
 	^self new initialize.! !
+
+
+!classDefinition: #TerniLapilliState category: #'TerniLapilli-Ejercicio'!
+Object subclass: #TerniLapilliState
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TerniLapilli-Ejercicio'!
+
+
+!classDefinition: #TerniLapilliMovingState category: #'TerniLapilli-Ejercicio'!
+TerniLapilliState subclass: #TerniLapilliMovingState
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TerniLapilli-Ejercicio'!
+
+!TerniLapilliMovingState methodsFor: 'as yet unclassified' stamp: 'mc 11/7/2018 21:36:55'!
+move: aChip from: fromPoint to: toPoint on: aTerniLapilli 
+	
+	aTerniLapilli validateMovefor: aChip  from:  fromPoint to: toPoint.
+	aTerniLapilli  mxxx: aChip from: fromPoint to: toPoint.! !
+
+!TerniLapilliMovingState methodsFor: 'as yet unclassified' stamp: 'mc 11/7/2018 20:44:40'!
+put: aChip at: aPoint on: aTerniLapilli
+
+	self error: aTerniLapilli cantFitMoreChips! !
+
+
+!classDefinition: #TerniLapilliOverState category: #'TerniLapilli-Ejercicio'!
+TerniLapilliState subclass: #TerniLapilliOverState
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TerniLapilli-Ejercicio'!
+
+!TerniLapilliOverState methodsFor: 'as yet unclassified' stamp: 'mc 11/7/2018 22:30:54'!
+move: aChip from: fromPoint to: toPoint on: aTerniLapilli 
+	
+	self error: self gameOver! !
+
+!TerniLapilliOverState methodsFor: 'as yet unclassified' stamp: 'mc 11/7/2018 22:31:02'!
+put: aChip at: aPoint on: aTerniLapilli
+
+	self error: self gameOver! !
+
+
+!classDefinition: #TerniLapilliStartState category: #'TerniLapilli-Ejercicio'!
+TerniLapilliState subclass: #TerniLapilliStartState
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TerniLapilli-Ejercicio'!
+
+!TerniLapilliStartState methodsFor: 'as yet unclassified' stamp: 'mc 11/7/2018 22:20:04'!
+put: aChip at: aPoint on: aTerniLapilli
+
+	
+	aTerniLapilli xxx: aChip put: aPoint.
+	aTerniLapilli changeToOccupy.! !
+
+
+!classDefinition: #TerniLapilliVacantState category: #'TerniLapilli-Ejercicio'!
+TerniLapilliState subclass: #TerniLapilliVacantState
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TerniLapilli-Ejercicio'!
+
+!TerniLapilliVacantState methodsFor: 'as yet unclassified' stamp: 'mc 11/7/2018 22:21:29'!
+put: aChip at: aPoint on: aTerniLapilli
+
+	aTerniLapilli validatePutfor: aChip and: aPoint.
+	aTerniLapilli xxx: aChip put: aPoint.
+	
+
+"
+	emptyBoard ifTrue: 
+	[
+		-first Play-
+		emptyBoard _ false.
+	] ifFalse: 
+	[
+		self validatePutfor: aChip and: aPoint .
+		
+		-sino juego-
+	].
+
+	board at: aPoint put: aChip.
+	lastPlayer := aChip.
+	chips _ chips +1.	
+		
+	(self hasWon: aChip) ifTrue: 
+	[
+		gameOver := true.
+		winner := aChip.
+		]
+"! !
