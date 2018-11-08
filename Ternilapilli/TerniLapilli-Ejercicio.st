@@ -5,10 +5,8 @@ TestCase subclass: #TerniLapilliTest
 	poolDictionaries: ''
 	category: 'TerniLapilli-Ejercicio'!
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'mc 11/5/2018 14:04:30'!
-test01
-
-	"al inicio de un nuevo juego el mismo debe estar vacio"
+!TerniLapilliTest methodsFor: 'test' stamp: 'A 11/8/2018 14:17:07'!
+test01JuegoSeIniciaConTableroVacio
 	
 	| ternidor | 
 	
@@ -16,10 +14,8 @@ test01
 	
 	self assert:  (ternidor isEmpty).! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'mc 11/5/2018 14:05:04'!
-test02
-
-	"Al colocar una ficha el juego ya no esta vacio y la posicion esta ocupada"
+!TerniLapilliTest methodsFor: 'test' stamp: 'A 11/8/2018 14:17:45'!
+test02TableroNoEstaVacioLuegoDeColocarUnaFicha
 	
 	| ternidor |
 	
@@ -29,10 +25,8 @@ test02
 	
 	self deny:  ternidor isEmpty.! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'A 11/5/2018 19:24:04'!
-test03
-
-	"No puede jugar el jugador X dos veces seguidas."
+!TerniLapilliTest methodsFor: 'test' stamp: 'A 11/8/2018 14:11:47'!
+test03JugadorNoPuedeJugarDosVecesSeguidas
 	
 	| ternidor |
 	
@@ -47,8 +41,8 @@ test03
 			self assert: error messageText equals: ternidor playerCantPlayTwiceInARowErrorMessage .
 			]! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'mc 11/8/2018 01:41:01'!
-test04
+!TerniLapilliTest methodsFor: 'test' stamp: 'A 11/8/2018 14:18:20'!
+test04XyOJueganPorTurnos
 
 	"Juegan X y luego O y todo esta bien"
 	
@@ -64,11 +58,9 @@ test04
 	self assert: (ternidor at:(2@1)) equals: 'O'.
 ! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'mc 11/8/2018 01:41:12'!
-test05
+!TerniLapilliTest methodsFor: 'test' stamp: 'A 11/8/2018 14:11:44'!
+test05NoSePuedeColocarFichaEnPosicionOcupada
 
-	"Juegan X y luego O quiere jugar en la misma posicion que X error"
-	
 	| ternidor |
 	
 	ternidor _ TerniLapilli newGame.
@@ -82,11 +74,9 @@ test05
 			self assert: error messageText equals: ternidor cantPutIntoAPositionAlreadyTakenErrorMessage.
 			]! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'mc 11/8/2018 01:41:40'!
-test06
+!TerniLapilliTest methodsFor: 'test' stamp: 'A 11/8/2018 14:11:41'!
+test06NoSePuedeColocarFichaEnPosicionInvalida
 
-	" Poner en una posicion no valida deberia tirar un error, no deberia dejar "
-	
 	| ternidor |
 	
 	ternidor _ TerniLapilli newGame.
@@ -95,11 +85,8 @@ test06
 		should: [ternidor put:'O' at:(4@1).]
 		raise: Error.! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'mc 11/8/2018 01:14:53'!
-test07
-
-	"cuando ya tengo tres fichas de cada uno no puedo poner mas"
-	
+!TerniLapilliTest methodsFor: 'test' stamp: 'A 11/8/2018 14:11:38'!
+test07NoPuedeHaberMasDeTresFichasPorJugadorEnTablero
 	
 	| ternidor |
 	
@@ -119,8 +106,30 @@ test07
 			self assert: error messageText equals: ternidor notMoreChipsErrorMessage .
 			]! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'A 11/5/2018 19:57:26'!
-test08
+!TerniLapilliTest methodsFor: 'test' stamp: 'A 11/8/2018 14:19:09'!
+test08SiAlMenosUnJugadorNoTieneTresFichasEnTableroNoSePuedeMoverFichas
+	
+	| ternidor  from to |
+	
+	ternidor _ TerniLapilli newGame.
+	
+	ternidor put:'X' at:(1@1).
+	ternidor put:'O' at:(2@1).
+
+	
+	from _ (3@1).
+	to _ (3@2).
+	
+
+	self 
+		should: [ternidor  move:'X' from:from to:to.]
+		raise: Error
+		withExceptionDo: [
+			:error | self assert: error messageText equals: ternidor notEnoughChipsToStartMoveErrorMessage.
+			]! !
+
+!TerniLapilliTest methodsFor: 'test' stamp: 'A 11/8/2018 14:20:13'!
+test09JugadorMueveFicha
 
 	"cuando ya tengo tres fichas de cada uno muevo como plebeyo"
 	
@@ -143,37 +152,9 @@ test08
 	self assert: (ternidor at: from) equals: nil.
 	self assert: (ternidor at: to) equals: 'X'.! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'mc 11/8/2018 01:46:15'!
-test09
-
-	"cuando menos de tres fichas de cada no puedo mover"
-	
-	
-	| ternidor  from to |
-	
-	ternidor _ TerniLapilli newGame.
-	
-	ternidor put:'X' at:(1@1).
-	ternidor put:'O' at:(2@1).
-
-	
-	from _ (3@1).
-	to _ (3@2).
-	
-
-	self 
-		should: [ternidor  move:'X' from:from to:to.]
-		raise: Error
-		withExceptionDo: [
-			:error | self assert: error messageText equals: ternidor notEnoughChipsToStartMoveErrorMessage.
-			]! !
-
-!TerniLapilliTest methodsFor: 'test' stamp: 'mc 11/8/2018 01:43:01'!
-test10
-
-	"muevo a una posicion ya ocupada debe dar error"
-	
-	
+!TerniLapilliTest methodsFor: 'test' stamp: 'A 11/8/2018 14:12:09'!
+test10NoSePuedeMoverAPosicionOcupada
+		
 	| ternidor  from to |
 	
 	ternidor _ TerniLapilli newGame.
@@ -195,11 +176,8 @@ test10
 			self assert: error messageText equals: ternidor cantMoveToPositionAlreadyTakenErrorMessage .
 			]! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'mc 11/8/2018 01:42:54'!
-test11
-
-	"Jugador no puede mover dos veces"
-	
+!TerniLapilliTest methodsFor: 'test' stamp: 'A 11/8/2018 14:15:04'!
+test11JugadorNoPuedeMoverDosVecesSeguidas	
 	
 	| ternidor  from to |
 	
@@ -225,12 +203,9 @@ test11
 			self assert: error messageText equals: ternidor playerCantPlayTwiceInARowErrorMessage .
 			]! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'mc 11/8/2018 01:42:46'!
-test12
-
-	"pone tres en vertical gana, el juego se termina, no se aceptan mas movimientos"
-	
-	
+!TerniLapilliTest methodsFor: 'test' stamp: 'A 11/8/2018 14:15:33'!
+test12SiElJuegoSeTerminaNoSePuedePonerFichas
+		
 	| ternidor  |
 	
 	ternidor _ TerniLapilli newGame.
@@ -247,12 +222,9 @@ test12
 		raise:Error.
 ! !
 
-!TerniLapilliTest methodsFor: 'test' stamp: 'mc 11/8/2018 01:42:32'!
-test13
-
-	"Jugador X obtiene tres en vertical luego de mover y gana, el juego se termina, no se aceptan mas movimientos"
-	
-	
+!TerniLapilliTest methodsFor: 'test' stamp: 'A 11/8/2018 14:16:11'!
+test13SiElJuegoSeTerminaNoSePuedeMoverFichas
+		
 	| ternidor  |
 	
 	ternidor _ TerniLapilli newGame.
