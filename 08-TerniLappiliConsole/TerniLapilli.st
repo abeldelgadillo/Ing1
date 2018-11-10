@@ -892,7 +892,7 @@ test01
 	self assert: lines next equals: 'Estado: Jugando O'.
 	self assert: lines atEnd.! !
 
-!TerniLapilliconsoleTest methodsFor: 'as yet unclassified' stamp: 'A 11/10/2018 17:01:00'!
+!TerniLapilliconsoleTest methodsFor: 'as yet unclassified' stamp: 'A 11/10/2018 18:07:19'!
 test02
 
 	|console lines|
@@ -900,14 +900,74 @@ test02
 	game := TerniLapilli new.
 	console := TerniLapilliConsole on: game.
 	
-	game putXAt: 2@2.
-	game putOAt: 1@1.
+	game 
+		putXAt: 2@2;
+		putOAt: 1@1.
 	
 	lines := console linesStream.
 	self assert: lines next equals: 'X marcó en 2@2'.
 	self assert: lines next equals: 'Estado: Jugando O'.
 	self assert: lines next equals: 'O marcó en 1@1'.
 	self assert: lines next equals: 'Estado: Jugando X'.
+	self assert: lines atEnd.! !
+
+!TerniLapilliconsoleTest methodsFor: 'as yet unclassified' stamp: 'A 11/10/2018 18:10:06'!
+test03
+
+	|console lines|
+	
+	game := TerniLapilli new.
+	console := TerniLapilliConsole on: game.
+	
+	game 
+		putXAt: 2@2;
+		putOAt: 1@1;
+		putXAt: 1@3;
+		putOAt: 1@2;
+		putXAt: 3@1.
+	
+	lines := console linesStream.
+	self assert: lines next equals: 'X marcó en 2@2'.
+	self assert: lines next equals: 'Estado: Jugando O'.
+	self assert: lines next equals: 'O marcó en 1@1'.
+	self assert: lines next equals: 'Estado: Jugando X'.
+	self assert: lines next equals: 'X marcó en 1@3'.
+	self assert: lines next equals: 'Estado: Jugando O'.
+	self assert: lines next equals: 'O marcó en 1@2'.
+	self assert: lines next equals: 'Estado: Jugando X'.
+	self assert: lines next equals: 'X marcó en 3@1'.
+	self assert: lines next equals: 'Estado: Juego terminado - ¡Ganó X!!'.
+	self assert: lines atEnd.! !
+
+!TerniLapilliconsoleTest methodsFor: 'as yet unclassified' stamp: 'A 11/10/2018 18:49:57'!
+test04
+
+	|console lines|
+	
+	game := TerniLapilli new.
+	console := TerniLapilliConsole on: game.
+	
+	game 
+		putXAt: 2@1;
+		putOAt: 2@2;
+		putXAt: 1@1;
+		putOAt: 1@3;
+		putXAt: 1@2;
+		putOAt: 3@1.
+	
+	lines := console linesStream.
+	self assert: lines next equals: 'X marcó en 2@1'.
+	self assert: lines next equals: 'Estado: Jugando O'.
+	self assert: lines next equals: 'O marcó en 2@2'.
+	self assert: lines next equals: 'Estado: Jugando X'.
+	self assert: lines next equals: 'X marcó en 1@1'.
+	self assert: lines next equals: 'Estado: Jugando O'.
+	self assert: lines next equals: 'O marcó en 1@3'.
+	self assert: lines next equals: 'Estado: Jugando X'.
+	self assert: lines next equals: 'X marcó en 1@2'.
+	self assert: lines next equals: 'Estado: Jugando O'.
+	self assert: lines next equals: 'O marcó en 3@1'.
+	self assert: lines next equals: 'Estado: Juego terminado - ¡Ganó O!!'.
 	self assert: lines atEnd.! !
 
 
@@ -1014,7 +1074,7 @@ putXAt: aPosition
 	state putXAt: aPosition! !
 
 
-!TerniLapilli methodsFor: 'marking board - private' stamp: 'A 11/10/2018 16:53:10'!
+!TerniLapilli methodsFor: 'marking board - private' stamp: 'A 11/10/2018 18:30:14'!
 changeStateAfterAdding: aPosition to: positions  
 
 	positions add: aPosition.
@@ -1022,16 +1082,16 @@ changeStateAfterAdding: aPosition to: positions
 	
 	state := TerniLapilliState for: self.
 	
-	console changeState: state.
+	console ifNotNil: [console changeState: state].
 	! !
 
-!TerniLapilli methodsFor: 'marking board - private' stamp: 'A 11/10/2018 17:02:08'!
+!TerniLapilli methodsFor: 'marking board - private' stamp: 'A 11/10/2018 18:29:58'!
 putOWhenPlacingOAt: aPosition
 
 	self playerOHasPiecesToPlace.
 	self assertIsFree: aPosition.
 
-	console putOAt: aPosition.
+	console ifNotNil: [console putOAt: aPosition].
 
 	self changeStateAfterAdding: aPosition to: playerOPositions
 		! !
@@ -1056,13 +1116,13 @@ putXWhenPlacingOAt: aPoint
 	
 	self error: self class notXTurnErrorMessage! !
 
-!TerniLapilli methodsFor: 'marking board - private' stamp: 'A 11/10/2018 16:53:20'!
+!TerniLapilli methodsFor: 'marking board - private' stamp: 'A 11/10/2018 18:29:41'!
 putXWhenPlacingXAt: aPosition
 
 	self playerXHasPiecesToPlace.
 	self assertIsFree: aPosition.
 	
-	console putXAt: aPosition.
+	console ifNotNil: [console putXAt: aPosition].
 	
 	self changeStateAfterAdding: aPosition to: playerXPositions
 	! !
@@ -1300,11 +1360,13 @@ Object subclass: #TerniLapilliConsole
 	poolDictionaries: ''
 	category: 'TerniLapilli'!
 
-!TerniLapilliConsole methodsFor: 'as yet unclassified' stamp: 'A 11/10/2018 17:04:39'!
+!TerniLapilliConsole methodsFor: 'as yet unclassified' stamp: 'A 11/10/2018 18:50:40'!
 changeState: aState
 
 	(aState isKindOf: PlacingX) ifTrue: [lines add: 'Estado: Jugando X'].
-	(aState isKindOf: PlacingO) ifTrue: [lines add: 'Estado: Jugando O'].! !
+	(aState isKindOf: PlacingO) ifTrue: [lines add: 'Estado: Jugando O'].
+	(aState isKindOf: XWon) ifTrue: [lines add: 'Estado: Juego terminado - ¡Ganó X!!'].
+	(aState isKindOf: OWon) ifTrue: [lines add: 'Estado: Juego terminado - ¡Ganó O!!'].! !
 
 !TerniLapilliConsole methodsFor: 'as yet unclassified' stamp: 'A 11/10/2018 16:46:27'!
 initializeOn: aTerniLapilli 
@@ -1465,10 +1527,48 @@ slideXFrom: aPosition to: anotherPostion
 GameOverState class
 	instanceVariableNames: ''!
 
-!GameOverState class methodsFor: 'state selection' stamp: 'HAW 11/8/2018 12:02:20'!
+!GameOverState class methodsFor: 'state selection' stamp: 'A 11/10/2018 18:45:54'!
 isFor: aTerniLapilli 
 
-	^ aTerniLapilli hasPlayerXWon or: [ aTerniLapilli hasPlayerOWon ]! !
+	^false.! !
+
+
+!classDefinition: #OWon category: #TerniLapilli!
+GameOverState subclass: #OWon
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TerniLapilli'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'OWon class' category: #TerniLapilli!
+OWon class
+	instanceVariableNames: ''!
+
+!OWon class methodsFor: 'as yet unclassified' stamp: 'A 11/10/2018 18:46:12'!
+isFor: aTerniLapilli
+
+	^ aTerniLapilli hasPlayerOWon! !
+
+
+!classDefinition: #XWon category: #TerniLapilli!
+GameOverState subclass: #XWon
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TerniLapilli'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'XWon class' category: #TerniLapilli!
+XWon class
+	instanceVariableNames: ''!
+
+!XWon class methodsFor: 'as yet unclassified' stamp: 'A 11/10/2018 18:46:27'!
+isFor: aTerniLapilli
+
+	^ aTerniLapilli hasPlayerXWon! !
 
 
 !classDefinition: #PlayingO category: #TerniLapilli!
