@@ -870,6 +870,57 @@ test40CanNotSlideOWhenPlayingX
 	! !
 
 
+!classDefinition: #TerniLapilliViewTest category: #TerniLapilli!
+TestCase subclass: #TerniLapilliViewTest
+	instanceVariableNames: 'game'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TerniLapilli'!
+
+!TerniLapilliViewTest methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 18:32:58'!
+test01
+
+	|view board|
+	
+	game := TerniLapilli new.
+	view := TerniLapilliView on: game.
+	
+	board := view board.
+	
+	self assert: board = #(
+	' | | '
+	'-----'
+	' | | '
+	'-----'
+	' | | '
+	'Playing X'
+	).! !
+
+!TerniLapilliViewTest methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 18:33:26'!
+test02
+
+	"Juega X"
+
+	|view board|
+	
+	game := TerniLapilli new.
+	view := TerniLapilliView on: game.
+	
+	game
+		putXAt: 2@2.
+
+	board := view board.
+	
+	self assert: board = #(
+	' | | '
+	'-----'
+	' |X| '
+	'-----'
+	' | | '
+	'Playing O'
+	).! !
+
+
 !classDefinition: #TerniLapilliconsoleTest category: #TerniLapilli!
 TestCase subclass: #TerniLapilliconsoleTest
 	instanceVariableNames: 'game'
@@ -1056,7 +1107,7 @@ test06
 
 !classDefinition: #TerniLapilli category: #TerniLapilli!
 Object subclass: #TerniLapilli
-	instanceVariableNames: 'state playerOPositions playerXPositions console'
+	instanceVariableNames: 'state playerOPositions playerXPositions console view'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TerniLapilli'!
@@ -1157,7 +1208,7 @@ putXAt: aPosition
 	state putXAt: aPosition! !
 
 
-!TerniLapilli methodsFor: 'marking board - private' stamp: 'A 11/10/2018 18:30:14'!
+!TerniLapilli methodsFor: 'marking board - private' stamp: 'A 11/11/2018 18:34:08'!
 changeStateAfterAdding: aPosition to: positions  
 
 	positions add: aPosition.
@@ -1166,7 +1217,8 @@ changeStateAfterAdding: aPosition to: positions
 	state := TerniLapilliState for: self.
 	
 	console ifNotNil: [console changeState: state].
-	! !
+	view ifNotNil: [view changeState: state].
+! !
 
 !TerniLapilli methodsFor: 'marking board - private' stamp: 'A 11/10/2018 18:29:58'!
 putOWhenPlacingOAt: aPosition
@@ -1199,13 +1251,14 @@ putXWhenPlacingOAt: aPoint
 	
 	self error: self class notXTurnErrorMessage! !
 
-!TerniLapilli methodsFor: 'marking board - private' stamp: 'A 11/10/2018 18:29:41'!
+!TerniLapilli methodsFor: 'marking board - private' stamp: 'A 11/11/2018 18:27:00'!
 putXWhenPlacingXAt: aPosition
 
 	self playerXHasPiecesToPlace.
 	self assertIsFree: aPosition.
 	
 	console ifNotNil: [console putXAt: aPosition].
+	view ifNotNil: [view putXAt: aPosition].
 	
 	self changeStateAfterAdding: aPosition to: playerXPositions
 	! !
@@ -1373,6 +1426,10 @@ isSlidingX
 console: aTerniLapilliConsole 
 	
 	console := aTerniLapilliConsole ! !
+
+!TerniLapilli methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 18:25:24'!
+view: aTerniLapilliView 
+	view := aTerniLapilliView .! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -1890,3 +1947,49 @@ SlidingX class
 isFor: aTerniLapilli 
 
 	^aTerniLapilli isPlayingO and: [ aTerniLapilli hasXMorePiecesToPlace not and: [ aTerniLapilli hasPlayerOWon not ]]! !
+
+
+!classDefinition: #TerniLapilliView category: #TerniLapilli!
+Object subclass: #TerniLapilliView
+	instanceVariableNames: 'board'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TerniLapilli'!
+
+!TerniLapilliView methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 18:25:33'!
+board
+	
+	^board! !
+
+!TerniLapilliView methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 18:36:22'!
+changeState: aState 
+	
+	^board at: 6 put: 'Playing O'.! !
+
+!TerniLapilliView methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 18:33:12'!
+initializeOn: aTerniLapilli 
+	aTerniLapilli view: self.
+	
+	board := #(
+	' | | '
+	'-----'
+	' | | '
+	'-----'
+	' | | '
+	'Playing X'
+	).! !
+
+!TerniLapilliView methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 18:28:59'!
+putXAt: aPosition 
+	
+	(board at: 3) at: 3 put: $X.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'TerniLapilliView class' category: #TerniLapilli!
+TerniLapilliView class
+	instanceVariableNames: ''!
+
+!TerniLapilliView class methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 18:24:18'!
+on: aTerniLapilli 
+	^ self new initializeOn: aTerniLapilli.! !
