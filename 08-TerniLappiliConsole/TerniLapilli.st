@@ -877,8 +877,10 @@ TestCase subclass: #TerniLapilliconsoleTest
 	poolDictionaries: ''
 	category: 'TerniLapilli'!
 
-!TerniLapilliconsoleTest methodsFor: 'as yet unclassified' stamp: 'A 11/10/2018 16:59:55'!
+!TerniLapilliconsoleTest methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 14:53:59'!
 test01
+
+	"Juega X"
 
 	|console lines|
 	
@@ -892,8 +894,10 @@ test01
 	self assert: lines next equals: 'Estado: Jugando O'.
 	self assert: lines atEnd.! !
 
-!TerniLapilliconsoleTest methodsFor: 'as yet unclassified' stamp: 'A 11/10/2018 18:07:19'!
+!TerniLapilliconsoleTest methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 14:54:09'!
 test02
+
+	"Juegan X y O"
 
 	|console lines|
 	
@@ -911,8 +915,10 @@ test02
 	self assert: lines next equals: 'Estado: Jugando X'.
 	self assert: lines atEnd.! !
 
-!TerniLapilliconsoleTest methodsFor: 'as yet unclassified' stamp: 'A 11/10/2018 18:10:06'!
+!TerniLapilliconsoleTest methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 14:54:17'!
 test03
+
+	"Gana X"
 
 	|console lines|
 	
@@ -939,8 +945,10 @@ test03
 	self assert: lines next equals: 'Estado: Juego terminado - ¡Ganó X!!'.
 	self assert: lines atEnd.! !
 
-!TerniLapilliconsoleTest methodsFor: 'as yet unclassified' stamp: 'A 11/10/2018 18:49:57'!
+!TerniLapilliconsoleTest methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 14:54:27'!
 test04
+
+	"Gana O"
 
 	|console lines|
 	
@@ -968,6 +976,81 @@ test04
 	self assert: lines next equals: 'Estado: Jugando O'.
 	self assert: lines next equals: 'O marcó en 3@1'.
 	self assert: lines next equals: 'Estado: Juego terminado - ¡Ganó O!!'.
+	self assert: lines atEnd.! !
+
+!TerniLapilliconsoleTest methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 14:58:01'!
+test05
+
+	"Mueve X"
+
+	|console lines|
+	
+	game := TerniLapilli new.
+	console := TerniLapilliConsole on: game.
+	
+	game 
+		putXAt: 2@1;
+		putOAt: 2@2;
+		putXAt: 1@1;
+		putOAt: 1@3;
+		putXAt: 1@2;
+		putOAt: 3@3;
+		slideXFrom: 2@1 to: 3@1.
+	
+	lines := console linesStream.
+	self assert: lines next equals: 'X marcó en 2@1'.
+	self assert: lines next equals: 'Estado: Jugando O'.
+	self assert: lines next equals: 'O marcó en 2@2'.
+	self assert: lines next equals: 'Estado: Jugando X'.
+	self assert: lines next equals: 'X marcó en 1@1'.
+	self assert: lines next equals: 'Estado: Jugando O'.
+	self assert: lines next equals: 'O marcó en 1@3'.
+	self assert: lines next equals: 'Estado: Jugando X'.
+	self assert: lines next equals: 'X marcó en 1@2'.
+	self assert: lines next equals: 'Estado: Jugando O'.
+	self assert: lines next equals: 'O marcó en 3@3'.
+	self assert: lines next equals: 'Estado: Jugando X'.
+	self assert: lines next equals: 'X deslizó hasta 3@1 desde 2@1'.
+	self assert: lines next equals: 'Estado: Jugando O'.
+	self assert: lines atEnd.! !
+
+!TerniLapilliconsoleTest methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 15:24:28'!
+test06
+
+	"Mueve X y O"
+
+	|console lines|
+	
+	game := TerniLapilli new.
+	console := TerniLapilliConsole on: game.
+	
+	game 
+		putXAt: 2@1;
+		putOAt: 2@2;
+		putXAt: 1@1;
+		putOAt: 1@3;
+		putXAt: 1@2;
+		putOAt: 3@3;
+		slideXFrom: 2@1 to: 3@1;
+		slideOFrom: 3@3 to: 3@2.
+	
+	lines := console linesStream.
+	self assert: lines next equals: 'X marcó en 2@1'.
+	self assert: lines next equals: 'Estado: Jugando O'.
+	self assert: lines next equals: 'O marcó en 2@2'.
+	self assert: lines next equals: 'Estado: Jugando X'.
+	self assert: lines next equals: 'X marcó en 1@1'.
+	self assert: lines next equals: 'Estado: Jugando O'.
+	self assert: lines next equals: 'O marcó en 1@3'.
+	self assert: lines next equals: 'Estado: Jugando X'.
+	self assert: lines next equals: 'X marcó en 1@2'.
+	self assert: lines next equals: 'Estado: Jugando O'.
+	self assert: lines next equals: 'O marcó en 3@3'.
+	self assert: lines next equals: 'Estado: Jugando X'.
+	self assert: lines next equals: 'X deslizó hasta 3@1 desde 2@1'.
+	self assert: lines next equals: 'Estado: Jugando O'.
+	self assert: lines next equals: 'O deslizó hasta 3@2 desde 3@3'.
+	self assert: lines next equals: 'Estado: Jugando X'.
 	self assert: lines atEnd.! !
 
 
@@ -1188,12 +1271,14 @@ slideOWhenPlayingXFrom: aPosition to: anotherPosition
 
 	self error: self class notOTurnErrorMessage ! !
 
-!TerniLapilli methodsFor: 'sliding - private' stamp: 'HAW 11/8/2018 11:53:04'!
+!TerniLapilli methodsFor: 'sliding - private' stamp: 'A 11/11/2018 15:25:49'!
 slideOWhenSlidingOFrom: aPosition to: anotherPosition
 	
 	self assertIsFree: anotherPosition .
 	self assertIsLegalMovementFrom: aPosition to: anotherPosition.
 	
+	console ifNotNil: [console slideOFrom: aPosition to: anotherPosition ].
+
 	playerOPositions remove: aPosition.
 	self changeStateAfterAdding: anotherPosition to: playerOPositions
 	 ! !
@@ -1208,12 +1293,14 @@ slideXWhenPlayingOFrom: aPosition to: anotherPosition
 
 	self error: self class notXTurnErrorMessage! !
 
-!TerniLapilli methodsFor: 'sliding - private' stamp: 'HAW 11/8/2018 11:53:04'!
+!TerniLapilli methodsFor: 'sliding - private' stamp: 'A 11/11/2018 15:01:21'!
 slideXWhenSlidingXFrom: aPosition to: anotherPosition
 	
 	self assertIsFree: anotherPosition .
 	self assertIsLegalMovementFrom: aPosition to: anotherPosition.
 	
+	console ifNotNil: [console slideXFrom: aPosition to: anotherPosition].
+
 	playerXPositions remove: aPosition.
 	self changeStateAfterAdding: anotherPosition to: playerXPositions! !
 
@@ -1360,11 +1447,11 @@ Object subclass: #TerniLapilliConsole
 	poolDictionaries: ''
 	category: 'TerniLapilli'!
 
-!TerniLapilliConsole methodsFor: 'as yet unclassified' stamp: 'A 11/10/2018 18:50:40'!
+!TerniLapilliConsole methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 15:06:05'!
 changeState: aState
 
-	(aState isKindOf: PlacingX) ifTrue: [lines add: 'Estado: Jugando X'].
-	(aState isKindOf: PlacingO) ifTrue: [lines add: 'Estado: Jugando O'].
+	(aState isKindOf: PlayingX) ifTrue: [lines add: 'Estado: Jugando X'].
+	(aState isKindOf: PlayingO) ifTrue: [lines add: 'Estado: Jugando O'].
 	(aState isKindOf: XWon) ifTrue: [lines add: 'Estado: Juego terminado - ¡Ganó X!!'].
 	(aState isKindOf: OWon) ifTrue: [lines add: 'Estado: Juego terminado - ¡Ganó O!!'].! !
 
@@ -1388,6 +1475,16 @@ putOAt: aPosition
 putXAt: aPosition
 
 	lines add: 'X marcó en ', aPosition printString.! !
+
+!TerniLapilliConsole methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 15:27:47'!
+slideOFrom: fromPosition to: toPosition 
+	
+	lines add: 'O deslizó hasta ', toPosition printString, ' desde ', fromPosition printString.! !
+
+!TerniLapilliConsole methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 15:03:24'!
+slideXFrom: fromPosition to: toPosition
+	
+	lines add: 'X deslizó hasta ', toPosition printString, ' desde ', fromPosition printString.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
