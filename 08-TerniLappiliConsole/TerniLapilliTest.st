@@ -925,8 +925,8 @@ TestCase subclass: #TerniLapilliViewTest
 	poolDictionaries: ''
 	category: 'TerniLapilliTest'!
 
-!TerniLapilliViewTest methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 18:32:58'!
-test01
+!TerniLapilliViewTest methodsFor: 'as yet unclassified' stamp: 'mc 11/12/2018 16:48:48'!
+test01AViewShowsANewGameAsEmptyBoard
 
 	|view board|
 	
@@ -944,8 +944,8 @@ test01
 	'Playing X'
 	).! !
 
-!TerniLapilliViewTest methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 18:33:26'!
-test02
+!TerniLapilliViewTest methodsFor: 'as yet unclassified' stamp: 'mc 11/12/2018 16:49:05'!
+test02AViewShowsTheFirstPlayOfX
 
 	"Juega X"
 
@@ -968,8 +968,8 @@ test02
 	'Playing O'
 	).! !
 
-!TerniLapilliViewTest methodsFor: 'as yet unclassified' stamp: 'A 11/12/2018 12:01:47'!
-test03
+!TerniLapilliViewTest methodsFor: 'as yet unclassified' stamp: 'mc 11/12/2018 16:51:14'!
+test03aAViewShowsBothPlayersPuts
 
 	"Juegan X y O"
 
@@ -993,8 +993,8 @@ test03
 	'Playing X'
 	).! !
 
-!TerniLapilliViewTest methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 19:58:56'!
-test04
+!TerniLapilliViewTest methodsFor: 'as yet unclassified' stamp: 'mc 11/12/2018 16:50:58'!
+test03bAViewShowsPlayersPutsOnTheBoard
 
 	"Juegan X, O y X"
 
@@ -1019,8 +1019,8 @@ test04
 	'Playing O'
 	).! !
 
-!TerniLapilliViewTest methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 20:22:00'!
-test05
+!TerniLapilliViewTest methodsFor: 'as yet unclassified' stamp: 'mc 11/12/2018 16:55:24'!
+test04AViewShowsTheBoardAndKnowsWhenXWins
 
 	"Gana X"
 	
@@ -1047,8 +1047,8 @@ test05
 	'X Won!!'
 	).! !
 
-!TerniLapilliViewTest methodsFor: 'as yet unclassified' stamp: 'A 11/12/2018 11:39:33'!
-test06
+!TerniLapilliViewTest methodsFor: 'as yet unclassified' stamp: 'mc 11/12/2018 16:55:32'!
+test05AViewShowsTheBoardAndKnowsWhenOWins
 
 	"Gana O"
 	
@@ -1076,8 +1076,8 @@ test06
 	'O Won!!'
 	).! !
 
-!TerniLapilliViewTest methodsFor: 'as yet unclassified' stamp: 'A 11/12/2018 11:49:52'!
-test07
+!TerniLapilliViewTest methodsFor: 'as yet unclassified' stamp: 'mc 11/12/2018 16:58:32'!
+test06AViewShowsWhenOMoves
 
 	"Mueve X"
 	
@@ -1106,10 +1106,10 @@ test07
 	'Playing O'
 	).! !
 
-!TerniLapilliViewTest methodsFor: 'as yet unclassified' stamp: 'A 11/12/2018 11:58:15'!
-test08
+!TerniLapilliViewTest methodsFor: 'as yet unclassified' stamp: 'mc 11/12/2018 16:58:59'!
+test07AViewShowsWhenXMoves
 
-	"Mueve O"
+	"Mueve X"
 	
 	|view board|
 	
@@ -1123,8 +1123,7 @@ test08
 		putOAt: 2@3;
 		putXAt: 1@2;
 		putOAt: 3@1;
-		slideXFrom: 1@2 to: 1@3;
-		slideOFrom: 3@1 to: 3@2.
+		slideXFrom: 1@2 to: 1@3.
 
 	board := view board.
 	
@@ -1133,8 +1132,38 @@ test08
 	'-----'
 	'X|O|O'
 	'-----'
-	' |O| '
-	'Playing X'
+	'O| | '
+	'Playing O'
+	).! !
+
+!TerniLapilliViewTest methodsFor: 'as yet unclassified' stamp: 'mc 11/12/2018 16:59:43'!
+test08AViewShowsMultiplesMoves
+
+	"Mueve X"
+	
+	|view board|
+	
+	game := TerniLapilli new.
+	view := TerniLapilliView on: game.
+	
+	game 
+		putXAt: 2@1;
+		putOAt: 2@2;
+		putXAt: 1@1;
+		putOAt: 2@3;
+		putXAt: 1@2;
+		putOAt: 3@1;
+		slideXFrom: 1@2 to: 1@3.
+
+	board := view board.
+	
+	self assert: board = #(
+	'X| |X'
+	'-----'
+	'X|O|O'
+	'-----'
+	'O| | '
+	'Playing O'
 	).! !
 
 
@@ -1145,10 +1174,8 @@ TestCase subclass: #TerniLapilliconsoleTest
 	poolDictionaries: ''
 	category: 'TerniLapilliTest'!
 
-!TerniLapilliconsoleTest methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 14:53:59'!
-test01
-
-	"Juega X"
+!TerniLapilliconsoleTest methodsFor: 'as yet unclassified' stamp: 'mc 11/12/2018 16:38:37'!
+test01AConsoleLogsTheBegginOfAGame
 
 	|console lines|
 	
@@ -1162,8 +1189,8 @@ test01
 	self assert: lines next equals: 'Estado: Jugando O'.
 	self assert: lines atEnd.! !
 
-!TerniLapilliconsoleTest methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 14:54:09'!
-test02
+!TerniLapilliconsoleTest methodsFor: 'as yet unclassified' stamp: 'mc 11/12/2018 16:39:44'!
+test02AConsoleLogsPlayersPuts
 
 	"Juegan X y O"
 
@@ -1183,8 +1210,8 @@ test02
 	self assert: lines next equals: 'Estado: Jugando X'.
 	self assert: lines atEnd.! !
 
-!TerniLapilliconsoleTest methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 14:54:17'!
-test03
+!TerniLapilliconsoleTest methodsFor: 'as yet unclassified' stamp: 'mc 11/12/2018 16:41:54'!
+test03AConsoleLogsWhenXWinsWithPut
 
 	"Gana X"
 
@@ -1213,8 +1240,8 @@ test03
 	self assert: lines next equals: 'Estado: Juego terminado - ¡Ganó X!!'.
 	self assert: lines atEnd.! !
 
-!TerniLapilliconsoleTest methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 14:54:27'!
-test04
+!TerniLapilliconsoleTest methodsFor: 'as yet unclassified' stamp: 'mc 11/12/2018 16:41:46'!
+test04AConsoleLogsWhenOWinsWithPut
 
 	"Gana O"
 
@@ -1246,8 +1273,8 @@ test04
 	self assert: lines next equals: 'Estado: Juego terminado - ¡Ganó O!!'.
 	self assert: lines atEnd.! !
 
-!TerniLapilliconsoleTest methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 14:58:01'!
-test05
+!TerniLapilliconsoleTest methodsFor: 'as yet unclassified' stamp: 'mc 11/12/2018 16:44:31'!
+test05AConsoleLogsXMoves
 
 	"Mueve X"
 
@@ -1282,8 +1309,8 @@ test05
 	self assert: lines next equals: 'Estado: Jugando O'.
 	self assert: lines atEnd.! !
 
-!TerniLapilliconsoleTest methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 15:24:28'!
-test06
+!TerniLapilliconsoleTest methodsFor: 'as yet unclassified' stamp: 'mc 11/12/2018 16:44:51'!
+test06AConsoleLogsWhenPlayersMoves
 
 	"Mueve X y O"
 
