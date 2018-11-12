@@ -1,6 +1,6 @@
 !classDefinition: #TerniLapilli category: #TerniLapilli!
 Object subclass: #TerniLapilli
-	instanceVariableNames: 'state playerOPositions playerXPositions console view'
+	instanceVariableNames: 'state playerOPositions playerXPositions console view lastPlay'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TerniLapilli'!
@@ -113,11 +113,13 @@ changeStateAfterAdding: aPosition to: positions
 	view ifNotNil: [view changeState: state].
 ! !
 
-!TerniLapilli methodsFor: 'marking board - private' stamp: 'A 11/11/2018 19:48:10'!
+!TerniLapilli methodsFor: 'marking board - private' stamp: 'A 11/12/2018 12:48:16'!
 putOWhenPlacingOAt: aPosition
 
 	self playerOHasPiecesToPlace.
 	self assertIsFree: aPosition.
+
+	lastPlay := $O -> aPosition.
 
 	console ifNotNil: [console putOAt: aPosition].
 	view ifNotNil: [view putOAt: aPosition].
@@ -145,12 +147,14 @@ putXWhenPlacingOAt: aPoint
 	
 	self error: self class notXTurnErrorMessage! !
 
-!TerniLapilli methodsFor: 'marking board - private' stamp: 'A 11/11/2018 18:27:00'!
+!TerniLapilli methodsFor: 'marking board - private' stamp: 'A 11/12/2018 12:47:26'!
 putXWhenPlacingXAt: aPosition
 
 	self playerXHasPiecesToPlace.
 	self assertIsFree: aPosition.
 	
+	lastPlay :=$X -> aPosition.
+
 	console ifNotNil: [console putXAt: aPosition].
 	view ifNotNil: [view putXAt: aPosition].
 	
@@ -218,13 +222,16 @@ slideOWhenPlayingXFrom: aPosition to: anotherPosition
 
 	self error: self class notOTurnErrorMessage ! !
 
-!TerniLapilli methodsFor: 'sliding - private' stamp: 'A 11/11/2018 15:25:49'!
+!TerniLapilli methodsFor: 'sliding - private' stamp: 'A 11/12/2018 12:58:10'!
 slideOWhenSlidingOFrom: aPosition to: anotherPosition
 	
 	self assertIsFree: anotherPosition .
 	self assertIsLegalMovementFrom: aPosition to: anotherPosition.
 	
+	lastPlay := $O -> anotherPosition.
+
 	console ifNotNil: [console slideOFrom: aPosition to: anotherPosition ].
+	view ifNotNil: [view slideOFrom: aPosition to: anotherPosition ].
 
 	playerOPositions remove: aPosition.
 	self changeStateAfterAdding: anotherPosition to: playerOPositions
@@ -240,13 +247,16 @@ slideXWhenPlayingOFrom: aPosition to: anotherPosition
 
 	self error: self class notXTurnErrorMessage! !
 
-!TerniLapilli methodsFor: 'sliding - private' stamp: 'A 11/11/2018 15:01:21'!
+!TerniLapilli methodsFor: 'sliding - private' stamp: 'A 11/12/2018 12:54:06'!
 slideXWhenSlidingXFrom: aPosition to: anotherPosition
 	
 	self assertIsFree: anotherPosition .
 	self assertIsLegalMovementFrom: aPosition to: anotherPosition.
 	
+	lastPlay := $X -> anotherPosition .
+
 	console ifNotNil: [console slideXFrom: aPosition to: anotherPosition].
+	view ifNotNil: [view slideXFrom: aPosition to: anotherPosition].
 
 	playerXPositions remove: aPosition.
 	self changeStateAfterAdding: anotherPosition to: playerXPositions! !
@@ -320,6 +330,10 @@ isSlidingX
 console: aTerniLapilliConsole 
 	
 	console := aTerniLapilliConsole ! !
+
+!TerniLapilli methodsFor: 'as yet unclassified' stamp: 'A 11/12/2018 12:44:50'!
+lastPlay
+	^lastPlay.! !
 
 !TerniLapilli methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 18:25:24'!
 view: aTerniLapilliView 
@@ -417,25 +431,35 @@ linesStream
 	
 	^ReadStream on: lines.! !
 
-!TerniLapilliConsole methodsFor: 'as yet unclassified' stamp: 'A 11/10/2018 17:03:09'!
+!TerniLapilliConsole methodsFor: 'as yet unclassified' stamp: 'A 11/12/2018 12:15:02'!
+put: aChar at: aPosition
+
+	lines add: aChar, ' marcó en ', aPosition printString.! !
+
+!TerniLapilliConsole methodsFor: 'as yet unclassified' stamp: 'A 11/12/2018 12:14:38'!
 putOAt: aPosition 
 	
-	lines add: 'O marcó en ', aPosition printString.! !
+	self put: $O at: aPosition .! !
 
-!TerniLapilliConsole methodsFor: 'as yet unclassified' stamp: 'A 11/10/2018 16:57:17'!
+!TerniLapilliConsole methodsFor: 'as yet unclassified' stamp: 'A 11/12/2018 12:15:12'!
 putXAt: aPosition
 
-	lines add: 'X marcó en ', aPosition printString.! !
+	self put: $X at: aPosition .! !
 
-!TerniLapilliConsole methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 15:27:47'!
+!TerniLapilliConsole methodsFor: 'as yet unclassified' stamp: 'A 11/12/2018 12:11:49'!
+slide: aChar from: fromPosition to: toPosition
+
+	lines add: aChar,' deslizó hasta ', toPosition printString, ' desde ', fromPosition printString.! !
+
+!TerniLapilliConsole methodsFor: 'as yet unclassified' stamp: 'A 11/12/2018 12:10:26'!
 slideOFrom: fromPosition to: toPosition 
 	
-	lines add: 'O deslizó hasta ', toPosition printString, ' desde ', fromPosition printString.! !
+	self slide: $O from: fromPosition to: toPosition .! !
 
-!TerniLapilliConsole methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 15:03:24'!
+!TerniLapilliConsole methodsFor: 'as yet unclassified' stamp: 'A 11/12/2018 12:14:16'!
 slideXFrom: fromPosition to: toPosition
 	
-	lines add: 'X deslizó hasta ', toPosition printString, ' desde ', fromPosition printString.! !
+	self slide: $X from: fromPosition to: toPosition .! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -855,11 +879,13 @@ board
 	
 	^board! !
 
-!TerniLapilliView methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 20:24:27'!
+!TerniLapilliView methodsFor: 'as yet unclassified' stamp: 'A 11/12/2018 11:49:28'!
 changeState: aState 
 	
 	(aState isKindOf: PlayingO) ifTrue: [^board at: 6 put: 'Playing O'].
-	(aState isKindOf: XWon) ifTrue: [^board at: 6 put: 'X Won!!'].! !
+	(aState isKindOf: PlayingX) ifTrue: [^board at: 6 put: 'Playing X'].
+	(aState isKindOf: XWon) ifTrue: [^board at: 6 put: 'X Won!!'].
+	(aState isKindOf: OWon) ifTrue: [^board at: 6 put: 'O Won!!'].! !
 
 !TerniLapilliView methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 18:33:12'!
 initializeOn: aTerniLapilli 
@@ -900,6 +926,52 @@ putXAt: aPosition
 	aPosition y = 2 ifTrue: [y := 3].
 	aPosition y = 3 ifTrue: [y := 5].
 
+	(board at: x) at: y put: $X.! !
+
+!TerniLapilliView methodsFor: 'as yet unclassified' stamp: 'A 11/12/2018 11:57:43'!
+slideOFrom: fromPosition to: toPosition 
+	
+	|x y|
+
+	fromPosition x = 1 ifTrue: [x := 1].
+	fromPosition x = 2 ifTrue: [x := 3].
+	fromPosition x = 3 ifTrue: [x := 5].
+	fromPosition y = 1 ifTrue: [y := 1].
+	fromPosition y = 2 ifTrue: [y := 3].
+	fromPosition y = 3 ifTrue: [y := 5].
+	
+	(board at: x) at: y put: $ .
+	
+	toPosition x = 1 ifTrue: [x := 1].
+	toPosition x = 2 ifTrue: [x := 3].
+	toPosition x = 3 ifTrue: [x := 5].
+	toPosition y = 1 ifTrue: [y := 1].
+	toPosition y = 2 ifTrue: [y := 3].
+	toPosition y = 3 ifTrue: [y := 5].
+	
+	(board at: x) at: y put: $O.	! !
+
+!TerniLapilliView methodsFor: 'as yet unclassified' stamp: 'A 11/12/2018 11:54:23'!
+slideXFrom: fromPosition to: toPosition 
+	
+	|x y|
+
+	fromPosition x = 1 ifTrue: [x := 1].
+	fromPosition x = 2 ifTrue: [x := 3].
+	fromPosition x = 3 ifTrue: [x := 5].
+	fromPosition y = 1 ifTrue: [y := 1].
+	fromPosition y = 2 ifTrue: [y := 3].
+	fromPosition y = 3 ifTrue: [y := 5].
+	
+	(board at: x) at: y put: $ .
+	
+	toPosition x = 1 ifTrue: [x := 1].
+	toPosition x = 2 ifTrue: [x := 3].
+	toPosition x = 3 ifTrue: [x := 5].
+	toPosition y = 1 ifTrue: [y := 1].
+	toPosition y = 2 ifTrue: [y := 3].
+	toPosition y = 3 ifTrue: [y := 5].
+	
 	(board at: x) at: y put: $X.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!

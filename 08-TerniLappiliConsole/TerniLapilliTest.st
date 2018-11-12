@@ -869,6 +869,54 @@ test40CanNotSlideOWhenPlayingX
 			self assertOIsMarkedOn: { 1@1 } ]
 	! !
 
+!TerniLapilliTest methodsFor: 'testing' stamp: 'A 11/12/2018 12:45:03'!
+test41
+
+	game _ TerniLapilli new.	
+	game putXAt: 2@2.
+
+	self assert: game lastPlay equals: $X -> (2@2).! !
+
+!TerniLapilliTest methodsFor: 'testing' stamp: 'A 11/12/2018 12:47:47'!
+test42
+
+	game _ TerniLapilli new.	
+	game putXAt: 2@2.
+	game putOAt: 1@2.
+
+	self assert: game lastPlay equals: $O -> (1@2).! !
+
+!TerniLapilliTest methodsFor: 'testing' stamp: 'A 11/12/2018 12:52:47'!
+test43
+
+	game _ TerniLapilli new.	
+	game putXAt: 1@1.
+	game putOAt: 2@1.
+	game putXAt: 1@2.
+	game putOAt: 2@2.
+	game putXAt: 3@1.
+	game putOAt: 3@2.
+
+	game slideXFrom: 1@2 to: 1@3.
+
+	self assert: game lastPlay equals: $X -> (1@3).! !
+
+!TerniLapilliTest methodsFor: 'testing' stamp: 'A 11/12/2018 12:57:40'!
+test44
+
+	game _ TerniLapilli new.	
+	game putXAt: 1@1.
+	game putOAt: 2@1.
+	game putXAt: 1@2.
+	game putOAt: 2@2.
+	game putXAt: 3@1.
+	game putOAt: 3@2.
+
+	game slideXFrom: 1@2 to: 1@3.
+	game slideOFrom: 3@2 to: 3@3.
+
+	self assert: game lastPlay equals: $O -> (3@3).! !
+
 
 !classDefinition: #TerniLapilliViewTest category: #TerniLapilliTest!
 TestCase subclass: #TerniLapilliViewTest
@@ -920,7 +968,7 @@ test02
 	'Playing O'
 	).! !
 
-!TerniLapilliViewTest methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 19:47:36'!
+!TerniLapilliViewTest methodsFor: 'as yet unclassified' stamp: 'A 11/12/2018 12:01:47'!
 test03
 
 	"Juegan X y O"
@@ -942,7 +990,7 @@ test03
 	' |X| '
 	'-----'
 	'O| | '
-	'Playing O'
+	'Playing X'
 	).! !
 
 !TerniLapilliViewTest methodsFor: 'as yet unclassified' stamp: 'A 11/11/2018 19:58:56'!
@@ -997,6 +1045,96 @@ test05
 	'-----'
 	'X| | '
 	'X Won!!'
+	).! !
+
+!TerniLapilliViewTest methodsFor: 'as yet unclassified' stamp: 'A 11/12/2018 11:39:33'!
+test06
+
+	"Gana O"
+	
+	|view board|
+	
+	game := TerniLapilli new.
+	view := TerniLapilliView on: game.
+	
+	game 
+		putXAt: 2@1;
+		putOAt: 2@2;
+		putXAt: 1@1;
+		putOAt: 1@3;
+		putXAt: 1@2;
+		putOAt: 3@1.
+
+	board := view board.
+	
+	self assert: board = #(
+	'X|X|O'
+	'-----'
+	'X|O| '
+	'-----'
+	'O| | '
+	'O Won!!'
+	).! !
+
+!TerniLapilliViewTest methodsFor: 'as yet unclassified' stamp: 'A 11/12/2018 11:49:52'!
+test07
+
+	"Mueve X"
+	
+	|view board|
+	
+	game := TerniLapilli new.
+	view := TerniLapilliView on: game.
+	
+	game 
+		putXAt: 2@1;
+		putOAt: 2@2;
+		putXAt: 1@1;
+		putOAt: 2@3;
+		putXAt: 1@2;
+		putOAt: 3@1;
+		slideXFrom: 1@2 to: 1@3.
+
+	board := view board.
+	
+	self assert: board = #(
+	'X| |X'
+	'-----'
+	'X|O|O'
+	'-----'
+	'O| | '
+	'Playing O'
+	).! !
+
+!TerniLapilliViewTest methodsFor: 'as yet unclassified' stamp: 'A 11/12/2018 11:58:15'!
+test08
+
+	"Mueve O"
+	
+	|view board|
+	
+	game := TerniLapilli new.
+	view := TerniLapilliView on: game.
+	
+	game 
+		putXAt: 2@1;
+		putOAt: 2@2;
+		putXAt: 1@1;
+		putOAt: 2@3;
+		putXAt: 1@2;
+		putOAt: 3@1;
+		slideXFrom: 1@2 to: 1@3;
+		slideOFrom: 3@1 to: 3@2.
+
+	board := view board.
+	
+	self assert: board = #(
+	'X| |X'
+	'-----'
+	'X|O|O'
+	'-----'
+	' |O| '
+	'Playing X'
 	).! !
 
 
