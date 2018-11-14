@@ -66,17 +66,23 @@ test05TheQuantityOfBooksToAddShouldBeAnIntegerBiggerThanZero
 	self should:[cart add: validBook with: -1] raise:Error .
 	self should:[cart add: validBook with: 1.25] raise:Error .! !
 
-!CarritoTest methodsFor: 'testing' stamp: 'mc 11/14/2018 02:00:03'!
+!CarritoTest methodsFor: 'testing' stamp: 'A 11/14/2018 16:42:13'!
 test06ACartShouldListTheProducts
 
-	"para hacer esto de manera mas rapida puede que necesitemos usar un diccionario para el carrito"
-	"
-	| books |
 	
+	| books dictionary|
+	
+	cart add: validBook with: 1.
+	cart add: otherValidBook with: 1.
+
 	books _ cart list.
 	
-	self assert: books = ('un libro valido|1|otro libro valido|1').
-	"! !
+	dictionary := Dictionary new.
+	dictionary add: validBook->1.
+	dictionary add: otherValidBook->1.
+
+	self assert: books = dictionary.
+	! !
 
 
 !CarritoTest methodsFor: 'setUp' stamp: 'mc 11/13/2018 22:25:21'!
@@ -96,20 +102,14 @@ Object subclass: #Cart
 	poolDictionaries: ''
 	category: 'TusLibros-Ejercicio'!
 
-!Cart methodsFor: 'evaluate' stamp: 'A 11/12/2018 20:13:41'!
+!Cart methodsFor: 'evaluate' stamp: 'A 11/14/2018 16:53:58'!
 itemsQuantity
-	^items size.! !
+	^items values sum.! !
 
-!Cart methodsFor: 'evaluate' stamp: 'A 11/12/2018 20:37:21'!
+!Cart methodsFor: 'evaluate' stamp: 'A 11/14/2018 16:52:50'!
 quantityOf: aBook
 
-	^items count:[:item | item = aBook ].! !
-
-
-!Cart methodsFor: 'initialization' stamp: 'A 11/12/2018 20:09:19'!
-initialize
-
-	items := OrderedCollection new.! !
+	^items at: aBook.! !
 
 
 !Cart methodsFor: 'private validate' stamp: 'A 11/12/2018 21:38:21'!
@@ -119,23 +119,29 @@ validateAvailable: aBook
 	! !
 
 
-!Cart methodsFor: 'add' stamp: 'A 11/12/2018 21:03:38'!
+!Cart methodsFor: 'add' stamp: 'A 11/14/2018 16:50:41'!
 add: aItem 
 	
 	self validateAvailable: aItem.
-	items add: aItem.! !
+	self add: aItem  with: 1.! !
 
 
-!Cart methodsFor: 'instantiation' stamp: 'A 11/12/2018 21:37:51'!
+!Cart methodsFor: 'instantiation' stamp: 'A 11/14/2018 16:49:27'!
 initializeWith: aCatalog 
-	catalog  _ aCatalog.! !
+	catalog  _ aCatalog.
+	items := Dictionary new.! !
 
 
-!Cart methodsFor: 'accessing' stamp: 'mc 11/14/2018 00:27:59'!
+!Cart methodsFor: 'accessing' stamp: 'A 11/14/2018 16:44:13'!
 add: aBook with: aQuantity 
 
 	(aQuantity > 0 and:[ aQuantity isInteger]) ifFalse:[self error:'Cantidad no valida']. 	
-	items add:  aBook  withOccurrences:  aQuantity.! !
+	items add:  aBook -> aQuantity.! !
+
+
+!Cart methodsFor: 'as yet unclassified' stamp: 'A 11/14/2018 16:42:28'!
+list
+	^items! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
