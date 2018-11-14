@@ -1,96 +1,92 @@
 !classDefinition: #CarritoTest category: #'TusLibros-Ejercicio'!
 TestCase subclass: #CarritoTest
-	instanceVariableNames: ''
+	instanceVariableNames: 'validBook otherValidBook cart'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Ejercicio'!
 
-!CarritoTest methodsFor: 'test' stamp: 'A 11/12/2018 21:39:08'!
-test01
+!CarritoTest methodsFor: 'testing' stamp: 'mc 11/14/2018 01:58:30'!
+test01ACartSohuldAddAValidBook
 
 	"Agrega un item a un carrito vacio, lo deja con un item que es el que agregue"
 	
-	|cart|
+	| newCart |
 	
-	cart := Cart with: (OrderedCollection with:'un libro valido').
+	newCart := Cart with: (OrderedCollection with:'un libro valido').
 	
-	cart add: 'un libro valido'.
+	newCart add: 'un libro valido'.
 	
-	self assert: 1 equals: cart itemsQuantity.
-	self assert: 1 equals: (cart quantityOf: 'un libro valido').! !
+	self assert: 1 equals: newCart itemsQuantity.
+	self assert: 1 equals: (newCart quantityOf: 'un libro valido').! !
 
-!CarritoTest methodsFor: 'test' stamp: 'A 11/12/2018 21:40:13'!
-test02
-
-	"Intentar agregar un item no valido al carrito tira error"
-	
-	|cart|
-	
-	cart := Cart with: (OrderedCollection with:'un libro valido').
-	
-	
-	
-	self should:[cart add: 'un libro no valido'.] raise:Error .! !
-
-!CarritoTest methodsFor: 'test' stamp: 'A 11/12/2018 21:26:49'!
-test03
+!CarritoTest methodsFor: 'testing' stamp: 'mc 11/14/2018 01:52:58'!
+test02AddAnInvalidBookToACartShouldThrowError
 
 	"Intentar agregar un item no valido al carrito tira error"
 	
-	|cart|
+	|newCart|
 	
-	cart := Cart new.
+	newCart := Cart with: (OrderedCollection with:'un libro valido').
 	
 	
 	
-	self should:[cart add: 'un libro no valido'.] raise:Error .
-! !
+	self should:[newCart add: 'un libro no valido'.] raise:Error .! !
 
-!CarritoTest methodsFor: 'test' stamp: 'A 11/12/2018 20:38:16'!
-test04
-
-	"Agrega item a un carrito vacio, cantidad del item debe ser uno"
-	
-	|cart book|
-	
-	cart := Cart new.
-	book := 'un libro'.
-	
-	cart add: book.
-	
-	self assert: 1 equals: (cart quantityOf: book).! !
-
-!CarritoTest methodsFor: 'test' stamp: 'A 11/12/2018 20:38:46'!
-test05
-
-	"Agrega item dos veces a un carrito vacio, cantidad del item debe ser dos"
-	
-	|cart book|
-	
-	cart := Cart new.
-	book := 'un libro'.
-	
-	cart add: book.
-	cart add: book.
-	
-	self assert: 2 equals: (cart quantityOf: book).! !
-
-!CarritoTest methodsFor: 'test' stamp: 'A 11/12/2018 20:33:18'!
-test06
+!CarritoTest methodsFor: 'testing' stamp: 'mc 11/13/2018 22:30:40'!
+test03ACartShouldLetAddDifferentBooks
 
 	"Agrega dos item distintos debe tener una cantidad uno de cada uno"
 	
-	|cart book otherBook|
+	cart add: validBook.
+	cart add: otherValidBook.
 	
-	cart := Cart new.
-	book := 'un libro'.
-	otherBook := 'otro libro'.
+	self assert: 2 equals: cart itemsQuantity.
+	self assert: 1 equals: (cart quantityOf: validBook).
+	self assert: 1 equals: (cart quantityOf: otherValidBook).! !
+
+!CarritoTest methodsFor: 'testing' stamp: 'mc 11/14/2018 00:28:27'!
+test04ACartShouldLetAddBooksInBatch
+
+	"puedo agregar multiples copias de un libro"
+
 	
-	cart add: book.
-	cart add: otherBook.
+	cart add:otherValidBook .
+	cart add: validBook with: 2.
 	
-	self assert: 1 equals: (cart quantityOf: book).
-	self assert: 1 equals: (cart quantityOf: otherBook).! !
+	self assert: 3 equals: cart itemsQuantity.
+	self assert: 2 equals: (cart quantityOf: validBook).
+	self assert: 1 equals: (cart quantityOf: otherValidBook).! !
+
+!CarritoTest methodsFor: 'testing' stamp: 'mc 11/14/2018 01:13:35'!
+test05TheQuantityOfBooksToAddShouldBeAnIntegerBiggerThanZero
+
+	"Agregar en cantidad tiene que ser mayor a cero"
+	
+	self should:[cart add: validBook with: 0] raise:Error .
+	self should:[cart add: validBook with: -1] raise:Error .
+	self should:[cart add: validBook with: 1.25] raise:Error .! !
+
+!CarritoTest methodsFor: 'testing' stamp: 'mc 11/14/2018 02:00:03'!
+test06ACartShouldListTheProducts
+
+	"para hacer esto de manera mas rapida puede que necesitemos usar un diccionario para el carrito"
+	"
+	| books |
+	
+	books _ cart list.
+	
+	self assert: books = ('un libro valido|1|otro libro valido|1').
+	"! !
+
+
+!CarritoTest methodsFor: 'setUp' stamp: 'mc 11/13/2018 22:25:21'!
+setUp
+		
+		
+	validBook := 'un libro valido'.
+	otherValidBook := 'otro libro valido'.
+	
+	cart := Cart with:(OrderedCollection with:validBook with:otherValidBook ).! !
 
 
 !classDefinition: #Cart category: #'TusLibros-Ejercicio'!
@@ -133,6 +129,13 @@ add: aItem
 !Cart methodsFor: 'instantiation' stamp: 'A 11/12/2018 21:37:51'!
 initializeWith: aCatalog 
 	catalog  _ aCatalog.! !
+
+
+!Cart methodsFor: 'accessing' stamp: 'mc 11/14/2018 00:27:59'!
+add: aBook with: aQuantity 
+
+	(aQuantity > 0 and:[ aQuantity isInteger]) ifFalse:[self error:'Cantidad no valida']. 	
+	items add:  aBook  withOccurrences:  aQuantity.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
