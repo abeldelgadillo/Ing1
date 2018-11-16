@@ -1,96 +1,136 @@
 !classDefinition: #CarritoTest category: #'TusLibros-Ejercicio'!
 TestCase subclass: #CarritoTest
-	instanceVariableNames: ''
+	instanceVariableNames: 'validBook otherValidBook cart'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Ejercicio'!
 
-!CarritoTest methodsFor: 'test' stamp: 'A 11/12/2018 21:39:08'!
-test01
+!CarritoTest methodsFor: 'testing' stamp: 'mc 11/14/2018 01:58:30'!
+test01ACartSohuldAddAValidBook
 
 	"Agrega un item a un carrito vacio, lo deja con un item que es el que agregue"
 	
-	|cart|
+	| newCart |
 	
-	cart := Cart with: (OrderedCollection with:'un libro valido').
+	newCart := Cart with: (OrderedCollection with:'un libro valido').
 	
-	cart add: 'un libro valido'.
+	newCart add: 'un libro valido'.
 	
-	self assert: 1 equals: cart itemsQuantity.
-	self assert: 1 equals: (cart quantityOf: 'un libro valido').! !
+	self assert: 1 equals: newCart itemsQuantity.
+	self assert: 1 equals: (newCart quantityOf: 'un libro valido').! !
 
-!CarritoTest methodsFor: 'test' stamp: 'A 11/12/2018 21:40:13'!
-test02
-
-	"Intentar agregar un item no valido al carrito tira error"
-	
-	|cart|
-	
-	cart := Cart with: (OrderedCollection with:'un libro valido').
-	
-	
-	
-	self should:[cart add: 'un libro no valido'.] raise:Error .! !
-
-!CarritoTest methodsFor: 'test' stamp: 'A 11/12/2018 21:26:49'!
-test03
+!CarritoTest methodsFor: 'testing' stamp: 'A 11/15/2018 11:49:25'!
+test02AddAnInvalidBookToACartShouldThrowError
 
 	"Intentar agregar un item no valido al carrito tira error"
 	
-	|cart|
+	|newCart|
 	
-	cart := Cart new.
+	newCart := Cart with: (OrderedCollection with:'un libro valido').
 	
 	
 	
-	self should:[cart add: 'un libro no valido'.] raise:Error .
-! !
+	self 
+		should:[newCart add: 'un libro no valido'.] 
+		raise:Error
+		withExceptionDo: [:error|
+			self assert: error messageText equals: Cart bookNotAvailableErrorMessage.
+			self assert: newCart itemsQuantity equals: 0].! !
 
-!CarritoTest methodsFor: 'test' stamp: 'A 11/12/2018 20:38:16'!
-test04
-
-	"Agrega item a un carrito vacio, cantidad del item debe ser uno"
-	
-	|cart book|
-	
-	cart := Cart new.
-	book := 'un libro'.
-	
-	cart add: book.
-	
-	self assert: 1 equals: (cart quantityOf: book).! !
-
-!CarritoTest methodsFor: 'test' stamp: 'A 11/12/2018 20:38:46'!
-test05
-
-	"Agrega item dos veces a un carrito vacio, cantidad del item debe ser dos"
-	
-	|cart book|
-	
-	cart := Cart new.
-	book := 'un libro'.
-	
-	cart add: book.
-	cart add: book.
-	
-	self assert: 2 equals: (cart quantityOf: book).! !
-
-!CarritoTest methodsFor: 'test' stamp: 'A 11/12/2018 20:33:18'!
-test06
+!CarritoTest methodsFor: 'testing' stamp: 'mc 11/13/2018 22:30:40'!
+test03ACartShouldLetAddDifferentBooks
 
 	"Agrega dos item distintos debe tener una cantidad uno de cada uno"
 	
-	|cart book otherBook|
+	cart add: validBook.
+	cart add: otherValidBook.
 	
-	cart := Cart new.
-	book := 'un libro'.
-	otherBook := 'otro libro'.
+	self assert: 2 equals: cart itemsQuantity.
+	self assert: 1 equals: (cart quantityOf: validBook).
+	self assert: 1 equals: (cart quantityOf: otherValidBook).! !
+
+!CarritoTest methodsFor: 'testing' stamp: 'mc 11/14/2018 00:28:27'!
+test04ACartShouldLetAddBooksInBatch
+
+	"puedo agregar multiples copias de un libro"
+
 	
-	cart add: book.
-	cart add: otherBook.
+	cart add:otherValidBook .
+	cart add: validBook with: 2.
 	
-	self assert: 1 equals: (cart quantityOf: book).
-	self assert: 1 equals: (cart quantityOf: otherBook).! !
+	self assert: 3 equals: cart itemsQuantity.
+	self assert: 2 equals: (cart quantityOf: validBook).
+	self assert: 1 equals: (cart quantityOf: otherValidBook).! !
+
+!CarritoTest methodsFor: 'testing' stamp: 'A 11/15/2018 11:50:21'!
+test05TheQuantityOfBooksToAddShouldBeAnIntegerBiggerThanZero
+
+	"Agregar en cantidad tiene que ser mayor a cero"
+	
+	self 
+		should:[cart add: validBook with: 0] 
+		raise:Error
+		withExceptionDo: [:error |
+			self assert: error messageText equals: Cart quantityMustBePositiveIntegerErrorMessage.
+			self assert: cart itemsQuantity equals: 0].
+	self 
+		should:[cart add: validBook with: -1] 
+		raise:Error 
+		withExceptionDo: [:error|
+			self assert: error messageText equals: Cart quantityMustBePositiveIntegerErrorMessage.
+			self assert: cart itemsQuantity equals: 0].
+	self 
+		should:[cart add: validBook with: 1.25] 
+		raise:Error 
+		withExceptionDo: [:error|
+			self assert: error messageText equals: Cart quantityMustBePositiveIntegerErrorMessage.
+			self assert: cart itemsQuantity equals: 0].! !
+
+!CarritoTest methodsFor: 'testing' stamp: 'A 11/15/2018 11:37:23'!
+test06ACartShouldListTheProducts
+
+	
+	| books|
+	
+	cart add: validBook with: 1.
+	cart add: otherValidBook with: 1.
+
+	books _ cart list.
+	
+	self assert: books keys size equals: 2.
+	self assert: (books at: validBook) equals: 1.
+	self assert: (books at: otherValidBook) equals: 1.
+! !
+
+!CarritoTest methodsFor: 'testing' stamp: 'A 11/15/2018 12:02:28'!
+test07cantAddAnyQuantityOfInvalidBooks
+	
+	self 
+		should:[cart add: 'un libro no valido' with: 2.] 
+		raise:Error
+		withExceptionDo: [:error|
+			self assert: error messageText equals: Cart bookNotAvailableErrorMessage.
+			self assert: cart itemsQuantity equals: 0].! !
+
+!CarritoTest methodsFor: 'testing' stamp: 'A 11/15/2018 12:10:40'!
+test08cantAskForQuantityOfBooksNotInCart
+	
+	self 
+		should:[cart quantityOf: validBook.] 
+		raise:Error
+		withExceptionDo: [:error|
+			self assert: error messageText equals: Cart bookNotInCartErrorMessage.
+			self assert: cart itemsQuantity equals: 0].! !
+
+
+!CarritoTest methodsFor: 'setUp' stamp: 'mc 11/13/2018 22:25:21'!
+setUp
+		
+		
+	validBook := 'un libro valido'.
+	otherValidBook := 'otro libro valido'.
+	
+	cart := Cart with:(OrderedCollection with:validBook with:otherValidBook ).! !
 
 
 !classDefinition: #Cart category: #'TusLibros-Ejercicio'!
@@ -100,39 +140,46 @@ Object subclass: #Cart
 	poolDictionaries: ''
 	category: 'TusLibros-Ejercicio'!
 
-!Cart methodsFor: 'evaluate' stamp: 'A 11/12/2018 20:13:41'!
+!Cart methodsFor: 'evaluate' stamp: 'A 11/15/2018 11:52:34'!
 itemsQuantity
-	^items size.! !
+	^items values inject: 0 into:[:sum :value | sum + value].! !
 
-!Cart methodsFor: 'evaluate' stamp: 'A 11/12/2018 20:37:21'!
+!Cart methodsFor: 'evaluate' stamp: 'A 11/15/2018 12:11:18'!
 quantityOf: aBook
 
-	^items count:[:item | item = aBook ].! !
+	^items at: aBook ifAbsent: [self error: self class bookNotInCartErrorMessage].! !
 
 
-!Cart methodsFor: 'initialization' stamp: 'A 11/12/2018 20:09:19'!
-initialize
-
-	items := OrderedCollection new.! !
-
-
-!Cart methodsFor: 'private validate' stamp: 'A 11/12/2018 21:38:21'!
+!Cart methodsFor: 'private validate' stamp: 'A 11/15/2018 11:42:51'!
 validateAvailable: aBook
 
-	(catalog includes: aBook) ifFalse:[self error: 'Ese libro no lo tengo CApo!!!!'].
+	(catalog includes: aBook) ifFalse:[self error: self class bookNotAvailableErrorMessage].
 	! !
 
 
-!Cart methodsFor: 'add' stamp: 'A 11/12/2018 21:03:38'!
+!Cart methodsFor: 'add' stamp: 'A 11/14/2018 16:50:41'!
 add: aItem 
 	
 	self validateAvailable: aItem.
-	items add: aItem.! !
+	self add: aItem  with: 1.! !
+
+!Cart methodsFor: 'add' stamp: 'A 11/15/2018 12:03:36'!
+add: aBook with: aQuantity 
+
+	self validateAvailable: aBook.
+	(aQuantity > 0 and:[ aQuantity isInteger]) ifFalse:[self error: self class quantityMustBePositiveIntegerErrorMessage]. 	
+	items add:  aBook -> aQuantity.! !
 
 
-!Cart methodsFor: 'instantiation' stamp: 'A 11/12/2018 21:37:51'!
+!Cart methodsFor: 'instantiation' stamp: 'A 11/14/2018 16:49:27'!
 initializeWith: aCatalog 
-	catalog  _ aCatalog.! !
+	catalog  _ aCatalog.
+	items := Dictionary new.! !
+
+
+!Cart methodsFor: 'accessing' stamp: 'A 11/14/2018 16:42:28'!
+list
+	^items! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -143,3 +190,19 @@ Cart class
 !Cart class methodsFor: 'instance creation' stamp: 'A 11/12/2018 21:37:04'!
 with: aCatalog 
 	^self new initializeWith: aCatalog .! !
+
+
+!Cart class methodsFor: 'error messages' stamp: 'A 11/15/2018 11:42:19'!
+bookNotAvailableErrorMessage
+
+	^'Libro no pertenece al catálogo.'! !
+
+!Cart class methodsFor: 'error messages' stamp: 'A 11/15/2018 12:11:59'!
+bookNotInCartErrorMessage
+
+	^'El libro no fue agregado al carrito'! !
+
+!Cart class methodsFor: 'error messages' stamp: 'A 11/15/2018 11:46:19'!
+quantityMustBePositiveIntegerErrorMessage
+
+	^'Cantidad invalida'! !
