@@ -136,15 +136,27 @@ createCart
 	^Cart acceptingItemsOf: self catalog.
 ! !
 
-!CashierTest methodsFor: 'setUp' stamp: 'A 11/20/2018 16:27:36'!
+!CashierTest methodsFor: 'setUp' stamp: 'A 11/20/2018 18:44:20'!
 expiredCreditCard
 
-	^'tarjeta de credito vencida'! !
+	|today|
+	
+	today := FixedGregorianDate today.
 
-!CashierTest methodsFor: 'setUp' stamp: 'A 11/20/2018 16:27:48'!
+	^CreditCard 
+		expiringOn:
+			(GregorianMonthOfYear year: today year monthNumber: today month number - 1).! !
+
+!CashierTest methodsFor: 'setUp' stamp: 'A 11/20/2018 19:34:21'!
 notExpiredCreditCard
 
-	^'tarjeta de credito'! !
+	|today|
+	
+	today := FixedGregorianDate today.
+
+	^CreditCard 
+		expiringOn:
+			(GregorianMonthOfYear year: today year monthNumber: today month number + 1).! !
 
 !CashierTest methodsFor: 'setUp' stamp: 'A 11/15/2018 19:11:09'!
 priceList
@@ -344,10 +356,10 @@ checkout: aCart
 	
 	"^(aCart listOfItems) inject: 0 into: [:sum :item | sum + (self priceOf: item)]."! !
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'A 11/20/2018 16:30:20'!
+!Cashier methodsFor: 'as yet unclassified' stamp: 'A 11/20/2018 19:30:19'!
 checkout: aCart chargingTo: aCreditCard 
 
-	aCreditCard = 'tarjeta de credito vencida' ifTrue: [self error: 'tarjeta vencida'].
+	aCreditCard expiration < FixedGregorianDate today monthOfYear ifTrue: [self error: 'tarjeta vencida'].
 	self isNotEmpty: aCart.
 
 	sales := sales +1.
@@ -384,3 +396,32 @@ Cashier class
 withPriceList: aPriceList 
 	
 	^self new initializeWith: aPriceList .! !
+
+
+!classDefinition: #CreditCard category: #TusLibros!
+Object subclass: #CreditCard
+	instanceVariableNames: 'expiration'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!CreditCard methodsFor: 'as yet unclassified' stamp: 'A 11/20/2018 19:33:33'!
+expiration
+	
+	^expiration! !
+
+!CreditCard methodsFor: 'as yet unclassified' stamp: 'A 11/20/2018 19:33:02'!
+initializeExpiringOn: aMonthOfYear 
+	
+	expiration := aMonthOfYear! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'CreditCard class' category: #TusLibros!
+CreditCard class
+	instanceVariableNames: ''!
+
+!CreditCard class methodsFor: 'as yet unclassified' stamp: 'A 11/20/2018 19:32:21'!
+expiringOn: aMonthOfYear
+
+	^self new initializeExpiringOn: aMonthOfYear .! !
