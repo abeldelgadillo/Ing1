@@ -120,14 +120,29 @@ TestCase subclass: #CashierTest
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!CashierTest methodsFor: 'setUp' stamp: 'A 11/15/2018 19:15:35'!
+!CashierTest methodsFor: 'setUp' stamp: 'A 11/20/2018 15:50:33'!
+catalog
+
+	|priceList|
+
+	priceList := Dictionary new.
+	priceList add: ('libro valido' -> 10).	
+	priceList add: ('otro libro valido' -> 5).
+	^priceList.! !
+
+!CashierTest methodsFor: 'setUp' stamp: 'A 11/20/2018 15:50:49'!
 createCart
 
-	^Cart acceptingItemsOf: #('libro valido' 'otro libro valido').
+	^Cart acceptingItemsOf: self catalog.
 ! !
 
-!CashierTest methodsFor: 'setUp' stamp: 'A 11/15/2018 20:37:51'!
-creditCard
+!CashierTest methodsFor: 'setUp' stamp: 'A 11/20/2018 16:27:36'!
+expiredCreditCard
+
+	^'tarjeta de credito vencida'! !
+
+!CashierTest methodsFor: 'setUp' stamp: 'A 11/20/2018 16:27:48'!
+notExpiredCreditCard
 
 	^'tarjeta de credito'! !
 
@@ -142,19 +157,19 @@ priceList
 	^priceList.! !
 
 
-!CashierTest methodsFor: 'test' stamp: 'A 11/15/2018 20:27:55'!
+!CashierTest methodsFor: 'test' stamp: 'A 11/20/2018 16:28:13'!
 test01TryToCheckoutAnEmptyCartShouldThrowAnError
 
 	"Checkoutear un carrtio vacío tira error"
 
 	|cashier cart|
 	
-	cashier := Cashier withPriceList: self priceList.
+	cashier := Cashier new.
 	
-	cart := Cart acceptingItemsOf: #().
+	cart := self createCart.
 
 	self 
-		should:[cashier checkout: cart]
+		should:[cashier checkout: cart chargingTo: self notExpiredCreditCard]
 		raise: Error
 		withExceptionDo: [:error|
 			self assert: error messageText = 'carrito vacio'.
@@ -162,36 +177,36 @@ test01TryToCheckoutAnEmptyCartShouldThrowAnError
 
 	self assert: 0 equals: cashier sales.! !
 
-!CashierTest methodsFor: 'test' stamp: 'A 11/15/2018 20:29:31'!
+!CashierTest methodsFor: 'test' stamp: 'A 11/20/2018 16:30:54'!
 test02CheckOutOfACartWithOnlyABookShouldReturnTheValueOfTheBook
 
 	"Checkoutear un carrtio con un solo item"
 
 	|cashier cart|
 	
-	cashier := Cashier withPriceList: self priceList.
+	cashier := Cashier new.
 	
-	cart := Cart acceptingItemsOf: #('libro valido').
+	cart := self createCart.
 	cart add: 'libro valido'.
 
-	self assert: (cashier checkout: cart) equals: 10.
+	self assert: (cashier checkout: cart chargingTo: self notExpiredCreditCard) equals: 10.
 	self assert: cashier sales equals: 1.! !
 
-!CashierTest methodsFor: 'test' stamp: 'A 11/15/2018 19:35:11'!
+!CashierTest methodsFor: 'test' stamp: 'A 11/20/2018 16:31:05'!
 test03aCheckoutOfACartWithMultipleBooksShouldReturnTheSumOfValues
 
 	"Checkoutear un carrtio con muchos items"
 
 	|cashier cart|
 	
-	cashier := Cashier withPriceList: self priceList.
+	cashier := Cashier new.
 	
-	cart := Cart acceptingItemsOf: #('libro valido').
+	cart := self createCart.
 	cart add: 2 of: 'libro valido'.
 
-	self assert: (cashier checkout: cart) equals: 20.! !
+	self assert: (cashier checkout: cart chargingTo: self notExpiredCreditCard) equals: 20.! !
 
-!CashierTest methodsFor: 'test' stamp: 'A 11/15/2018 19:35:41'!
+!CashierTest methodsFor: 'test' stamp: 'A 11/20/2018 16:31:18'!
 test03bCheckoutOfACartWithDifferentBooksShouldReturnTheSumOfValues
 
 	"Checkoutear un carrtio con muchos items distintos"
@@ -199,21 +214,21 @@ test03bCheckoutOfACartWithDifferentBooksShouldReturnTheSumOfValues
 	|cashier cart |
 	
 	
-	cashier := Cashier withPriceList: self priceList.
+	cashier := Cashier new.
 	
 	cart := self createCart.
 	cart add: 2 of: 'libro valido'.
 	cart add: 1 of: 'otro libro valido'.
 
-	self assert: (cashier checkout: cart) equals: 25.! !
+	self assert: (cashier checkout: cart chargingTo: self notExpiredCreditCard) equals: 25.! !
 
-!CashierTest methodsFor: 'test' stamp: 'A 11/15/2018 20:43:44'!
+!CashierTest methodsFor: 'test' stamp: 'A 11/20/2018 16:28:05'!
 test04cantCheckoutWithExpiredCreditCard
 
 	|cashier cart creditCard|
 	
-	creditCard := self creditCard.
-	cashier := Cashier withPriceList: self priceList.
+	creditCard := self expiredCreditCard.
+	cashier := Cashier new.
 	
 	cart := self createCart.
 	cart add: 2 of: 'libro valido'.
@@ -247,10 +262,10 @@ invalidQuantityErrorMessage
 	^'Invalid number of items'! !
 
 
-!Cart methodsFor: 'assertions' stamp: 'HernanWilkinson 6/17/2013 17:51'!
+!Cart methodsFor: 'assertions' stamp: 'A 11/20/2018 15:52:44'!
 assertIsValidItem: anItem
 
-	(catalog includes: anItem) ifFalse: [ self error: self invalidItemErrorMessage ]! !
+	(catalog keys includes: anItem) ifFalse: [ self error: self invalidItemErrorMessage ]! !
 
 !Cart methodsFor: 'assertions' stamp: 'HernanWilkinson 6/17/2013 17:51'!
 assertIsValidQuantity: aQuantity
@@ -296,9 +311,11 @@ add: aQuantity of: anItem
 	1 to: aQuantity do: [ :aNumber | items add: anItem ]! !
 
 
-!Cart methodsFor: 'as yet unclassified' stamp: 'A 11/15/2018 18:54:14'!
-listOfItems
-	^items! !
+!Cart methodsFor: 'as yet unclassified' stamp: 'A 11/20/2018 15:55:09'!
+sumarize
+	
+	^items inject: 0 into: [:sum :item| sum + (catalog at: item)].
+! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -319,24 +336,34 @@ Object subclass: #Cashier
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'A 11/15/2018 21:05:48'!
+!Cashier methodsFor: 'as yet unclassified' stamp: 'A 11/20/2018 16:25:46'!
 checkout: aCart 
-	aCart isEmpty ifTrue: [self error: 'carrito vacio'].
+	self isNotEmpty: aCart.
 	sales := sales +1.
 	^aCart sumarize.
 	
 	"^(aCart listOfItems) inject: 0 into: [:sum :item | sum + (self priceOf: item)]."! !
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'A 11/15/2018 20:44:22'!
-checkout: aCart chargingTo: aString 
+!Cashier methodsFor: 'as yet unclassified' stamp: 'A 11/20/2018 16:30:20'!
+checkout: aCart chargingTo: aCreditCard 
 
-	self error: 'tarjeta vencida'.! !
+	aCreditCard = 'tarjeta de credito vencida' ifTrue: [self error: 'tarjeta vencida'].
+	self isNotEmpty: aCart.
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'A 11/15/2018 20:31:19'!
-initializeWith: aDictionary 
+	sales := sales +1.
+	^aCart sumarize.
+! !
 
-	priceList := aDictionary .
+!Cashier methodsFor: 'as yet unclassified' stamp: 'A 11/20/2018 15:58:52'!
+initialize
+
 	sales := 0.! !
+
+!Cashier methodsFor: 'as yet unclassified' stamp: 'A 11/20/2018 16:26:19'!
+isNotEmpty: aCart
+
+	^aCart isEmpty ifTrue: [self error: 'carrito vacio'].
+! !
 
 !Cashier methodsFor: 'as yet unclassified' stamp: 'A 11/15/2018 18:57:17'!
 priceOf: aBook
