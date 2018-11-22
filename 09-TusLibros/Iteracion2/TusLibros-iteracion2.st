@@ -97,10 +97,11 @@ createCart
 	
 	^Cart acceptingItemsOf: self defaultCatalog! !
 
-!CartTest methodsFor: 'support' stamp: 'HernanWilkinson 6/17/2013 17:43'!
+!CartTest methodsFor: 'support' stamp: 'A 11/22/2018 16:47:58'!
 defaultCatalog
 	
-	^ Array with: self itemSellByTheStore! !
+	^ Dictionary new at: self itemSellByTheStore put: 10;
+	yourself.! !
 
 !CartTest methodsFor: 'support' stamp: 'HernanWilkinson 6/17/2013 17:44'!
 itemNotSellByTheStore
