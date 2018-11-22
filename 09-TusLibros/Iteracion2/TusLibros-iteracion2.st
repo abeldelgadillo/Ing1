@@ -255,6 +255,21 @@ test04cantCheckoutWithExpiredCreditCard
 
 	self assert: cashier sales equals: 0.! !
 
+!CashierTest methodsFor: 'test' stamp: 'mc 11/22/2018 07:40:31'!
+test05
+
+	"no se puede checkoutear con una tarjeta con numero mal"! !
+
+!CashierTest methodsFor: 'test' stamp: 'mc 11/22/2018 07:40:42'!
+test06
+
+	"no se puede checkoutear con una tarjeta sin dueño"! !
+
+!CashierTest methodsFor: 'test' stamp: 'mc 11/22/2018 07:54:45'!
+test07
+
+	"aca deberiamos empezar a interactuar con el <merchant processor> o con lo que simule los servicios"! !
+
 
 !classDefinition: #Cart category: #TusLibros!
 Object subclass: #Cart
@@ -400,7 +415,7 @@ withPriceList: aPriceList
 
 !classDefinition: #CreditCard category: #TusLibros!
 Object subclass: #CreditCard
-	instanceVariableNames: 'expiration'
+	instanceVariableNames: 'expiration owner number'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
@@ -415,6 +430,13 @@ initializeExpiringOn: aMonthOfYear
 	
 	expiration := aMonthOfYear! !
 
+!CreditCard methodsFor: 'as yet unclassified' stamp: 'mc 11/22/2018 07:39:22'!
+initializeFor: anOwner number: aNumber expiration: aMonthOfYear
+	
+	expiration := aMonthOfYear.
+	owner _ anOwner.
+	number _ aNumber .! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'CreditCard class' category: #TusLibros!
@@ -425,3 +447,10 @@ CreditCard class
 expiringOn: aMonthOfYear
 
 	^self new initializeExpiringOn: aMonthOfYear .! !
+
+!CreditCard class methodsFor: 'as yet unclassified' stamp: 'mc 11/22/2018 07:38:18'!
+for: anOwner with: aNumber andExpiration: aMonthOfYear
+
+ "me queda la duda de si aca deberia tener las validaciones"
+
+	^self new initializeFor: anOwner number: aNumber expiration: aMonthOfYear .! !
