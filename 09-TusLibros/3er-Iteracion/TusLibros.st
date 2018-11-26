@@ -253,16 +253,16 @@ TestCase subclass: #RestInterfaceTest
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!RestInterfaceTest methodsFor: 'test' stamp: 'mc 11/25/2018 20:25:56'!
+!RestInterfaceTest methodsFor: 'test' stamp: 'mc 11/25/2018 22:17:18'!
 test01CreateACartForInvalidClientOrPasswordShouldRaiseError
 
-	| aRestInterface client clientPassword |
+	| aRestInterface noExistenClient clientPassword |
 	
-	client _ '1'.
+	noExistenClient _ 2.
 	clientPassword _ '123'.
-	aRestInterface  _ RestInterface new.
+	aRestInterface  _ RestInterface with: (Dictionary new at: 1 put:clientPassword; yourself ).
 	
-	self should: [ aRestInterface createCartFor:client withPassword: clientPassword] 
+	self should: [ aRestInterface createCartFor:noExistenClient withPassword: clientPassword] 
 		raise: Error
 		withExceptionDo:[ :anError | self assert: anError messageText = RestInterface invalidUserOrPassword].
 		
@@ -270,9 +270,22 @@ test01CreateACartForInvalidClientOrPasswordShouldRaiseError
 		raise: Error
 		withExceptionDo:[ :anError | self assert: anError messageText = RestInterface invalidUserOrPassword].
 		
-	self should: [ aRestInterface createCartFor:client withPassword: ''] 
+	self should: [ aRestInterface createCartFor:noExistenClient withPassword: ''] 
 		raise: Error
 		withExceptionDo:[ :anError | self assert: anError messageText = RestInterface invalidUserOrPassword].! !
+
+!RestInterfaceTest methodsFor: 'test' stamp: 'mc 11/25/2018 21:24:17'!
+test02CreateACartForAValidClientAndPasswordShouldCreateACart
+
+	| client clientPassword restInterface |
+	
+	client _ 1.
+	clientPassword _ '123'.
+	restInterface  _ RestInterface with: (Dictionary new at: client put:clientPassword; yourself ).
+	
+	 restInterface createCartFor:client withPassword: clientPassword.
+	
+	self assert: (restInterface cartFor: client) isEmpty .! !
 
 
 !classDefinition: #Cart category: #TusLibros!
@@ -482,15 +495,33 @@ expiringOn: aMonth
 
 !classDefinition: #RestInterface category: #TusLibros!
 Object subclass: #RestInterface
-	instanceVariableNames: 'testObjectsFactory debitBehavior'
+	instanceVariableNames: 'testObjectsFactory debitBehavior clients openCarts'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!RestInterface methodsFor: 'as yet unclassified' stamp: 'mc 11/25/2018 20:24:32'!
+!RestInterface methodsFor: 'as yet unclassified' stamp: 'mc 11/25/2018 21:14:50'!
 createCartFor: aClient withPassword: aPassword.
 
-	^ self error: self class invalidUserOrPassword.! !
+"	^ self error: self class invalidUserOrPassword. "
+
+	clients at: aClient ifAbsent: [^ self error: self class invalidUserOrPassword. ].
+	
+	openCarts at: aClient put: StoreTestObjectsFactory  new createCart.! !
+
+
+!RestInterface methodsFor: 'initialization' stamp: 'mc 11/25/2018 21:16:21'!
+initializeWith: aDictionary 
+	
+	clients _ aDictionary.
+	
+	openCarts _ Dictionary new.! !
+
+
+!RestInterface methodsFor: 'accessing' stamp: 'mc 11/25/2018 21:18:34'!
+cartFor: aClientId
+	
+	^ (openCarts at: aClientId) copy.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -498,10 +529,16 @@ createCartFor: aClient withPassword: aPassword.
 RestInterface class
 	instanceVariableNames: ''!
 
-!RestInterface class methodsFor: 'as yet unclassified' stamp: 'mc 11/25/2018 20:20:39'!
+!RestInterface class methodsFor: 'error message' stamp: 'mc 11/25/2018 20:20:39'!
 invalidUserOrPassword
 
 	  ^'Usuario o Password invalido'.! !
+
+
+!RestInterface class methodsFor: 'instance creation' stamp: 'mc 11/25/2018 20:47:31'!
+with: aDictionary
+	
+	^ self new initializeWith: aDictionary .! !
 
 
 !classDefinition: #Sale category: #TusLibros!
