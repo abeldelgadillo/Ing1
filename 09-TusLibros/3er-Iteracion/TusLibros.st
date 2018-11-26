@@ -274,8 +274,8 @@ test01CreateACartForInvalidClientOrPasswordShouldRaiseError
 		raise: Error
 		withExceptionDo:[ :anError | self assert: anError messageText = RestInterface invalidUserOrPassword].! !
 
-!RestInterfaceTest methodsFor: 'test' stamp: 'mc 11/25/2018 21:24:17'!
-test02CreateACartForAValidClientAndPasswordShouldCreateACart
+!RestInterfaceTest methodsFor: 'test' stamp: 'mc 11/26/2018 14:24:08'!
+test02CreateACartForAValidClientAndPasswordShouldCreateAnEmptyCart
 
 	| client clientPassword restInterface |
 	
@@ -286,6 +286,19 @@ test02CreateACartForAValidClientAndPasswordShouldCreateACart
 	 restInterface createCartFor:client withPassword: clientPassword.
 	
 	self assert: (restInterface cartFor: client) isEmpty .! !
+
+!RestInterfaceTest methodsFor: 'test' stamp: 'mc 11/26/2018 16:59:47'!
+test03AddToCartAnInexistentCartShouldThrowError
+
+	| client clientPassword restInterface cart |
+	
+	client _ 1.
+	clientPassword _ '123'.
+	
+	restInterface  _ RestInterface with: (Dictionary new at: client put:clientPassword; yourself ). 
+	
+	self should: [ restInterface add:'INVALID BOOK' to: 666.] 
+		raise: Error.! !
 
 
 !classDefinition: #Cart category: #TusLibros!
