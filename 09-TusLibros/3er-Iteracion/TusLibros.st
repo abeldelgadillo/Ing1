@@ -418,42 +418,60 @@ test02CreateACartForAValidClientAndPasswordShouldCreateAnEmptyCart
 	
 	self assert: OrderedCollection new equals: (restInterface list: cartId) .! !
 
-!RestInterfaceTest methodsFor: 'test' stamp: 'mc 11/26/2018 16:59:47'!
+!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/2/2018 11:46:10'!
 test03AddToCartAnInexistentCartShouldThrowError
 
-	| client clientPassword restInterface cart |
+	| client clientPassword restInterface |
 	
 	client _ 1.
 	clientPassword _ '123'.
 	
 	restInterface  _ RestInterface with: (Dictionary new at: client put:clientPassword; yourself ). 
 	
-	self should: [ restInterface add:'INVALID BOOK' to: 666.] 
-		raise: Error.! !
+	self should: [ restInterface add:1 of:'INVALID BOOK' to: 666.] 
+		raise: Error
+		withExceptionDo:[ :anError | self assert: anError messageText = RestInterface invalidCartId ].! !
 
-!RestInterfaceTest methodsFor: 'test' stamp: 'mc 11/28/2018 01:36:49'!
+!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/2/2018 11:47:46'!
 test04AddAnInvalidBookToCartShouldThrowError
 
-	"Agrego un libro al carrito es correcto o se hace correctamente"
+
+	| client clientPassword restInterface cartId invalidBook |
+	
+	client _ 1.
+	clientPassword _ '123'.
+	invalidBook _ StoreTestObjectsFactory new itemNotSellByTheStore.
+	
+	restInterface  _ RestInterface with: (Dictionary new at: client put:clientPassword; yourself ). 
+	
+	cartId _ restInterface createCartFor:client withPassword: clientPassword.
+
+	self should:[restInterface add: 1 of: invalidBook to: cartId ]
+		raise: Error
+		withExceptionDo: [:anError | self assert: anError messageText = Cart  new invalidItemErrorMessage]
+! !
+
+!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/1/2018 17:13:02'!
+test05AddAnInvalidQunatityOfBooksToCartShouldThrowError
+
 
 	| client clientPassword restInterface validBook cartId |
 	
 	client _ 1.
 	clientPassword _ '123'.
-	validBook _ StoreTestObjectsFactory new itemNotSellByTheStore.
+	validBook _ StoreTestObjectsFactory new itemSellByTheStore.
 	
 	restInterface  _ RestInterface with: (Dictionary new at: client put:clientPassword; yourself ). 
 	
-	
 	cartId _ restInterface createCartFor:client withPassword: clientPassword.
-
-	self should:[restInterface add: validBook to: cartId ]
+	
+	self should:[restInterface add: -1 of: validBook to: cartId ]
 		raise: Error
-		withExceptionDo: [:anError | self assert: anError messageText = Cart  new invalidItemErrorMessage]
+		withExceptionDo: [:anError | self assert: anError messageText = Cart  new invalidQuantityErrorMessage]
 ! !
 
-!RestInterfaceTest methodsFor: 'test' stamp: 'mc 11/28/2018 01:37:37'!
-test05
+!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/1/2018 17:25:20'!
+test06AddValidBooksToACartShouldMakeThemAppearOnTheCartList
 
 	"Agregar libros al carrito es correcto o se hace correctamente"
 
@@ -466,11 +484,45 @@ test05
 	restInterface  _ RestInterface with: (Dictionary new at: client put:clientPassword; yourself ).	
 	cartId _ restInterface createCartFor:client withPassword: clientPassword.
 
+	self assert: 0 equals: (restInterface list: cartId) size.
+	self assert: 0 equals: ( (restInterface list: cartId) occurrencesOf: validBook ).
+
 	restInterface add: 2 of: validBook to: cartId.
 	
-	self assert: 2 equals: (restInterface list: client) size.
-	self assert: 2 equals: ( (restInterface list: client) occurrencesOf: validBook ).
+	self assert: 2 equals: (restInterface list: cartId) size.
+	self assert: 2 equals: ( (restInterface list: cartId) occurrencesOf: validBook ).
 ! !
+
+!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/1/2018 17:35:19'!
+test07ListAnInvalidCartShouldThrowAnError
+
+	| client clientPassword restInterface |
+
+	client _ 1.
+	clientPassword _ '123'.
+		
+	restInterface  _ RestInterface with: (Dictionary new at: client put:clientPassword; yourself ).	
+	
+	self should: [restInterface list: 666]
+		raise: Error! !
+
+!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/1/2018 17:46:03'!
+test08ListACartDoesNotContainsNotAddedBooks
+
+	| client clientPassword restInterface cartId invalidBook validBook |
+
+	client _ 1.
+	clientPassword _ '123'.
+	validBook _ StoreTestObjectsFactory new itemSellByTheStore.
+	invalidBook _ StoreTestObjectsFactory new itemNotSellByTheStore.
+	restInterface  _ RestInterface with: (Dictionary new at: client put:clientPassword; yourself ).	
+	cartId _ restInterface createCartFor:client withPassword: clientPassword.	
+	
+	restInterface add: 2 of: validBook to: cartId.
+	
+	self assert: 0 equals: ( (restInterface list: cartId) occurrencesOf: invalidBook ).
+	
+	! !
 
 
 !classDefinition: #Cart category: #TusLibros!
@@ -742,19 +794,12 @@ cartFor: aClientId
 	^ (openCarts at: aClientId) copy.! !
 
 
-!RestInterface methodsFor: 'public protocol' stamp: 'A 11/26/2018 20:48:18'!
+!RestInterface methodsFor: 'public protocol' stamp: 'mc 12/2/2018 11:45:37'!
 add: aQuantity of: aBook to: aUser
 
-	(clients keys includes: aUser) not ifTrue: [self error: 'Carrito inexistente' ].
+	(clients keys includes: aUser) not ifTrue: [self error: self class invalidCartId].
 
 	(openCarts at: aUser) add: aQuantity of: aBook.! !
-
-!RestInterface methodsFor: 'public protocol' stamp: 'mc 11/28/2018 01:14:14'!
-add: aBook to: aCartId
-
-	"(clients keys includes: aUser) not ifTrue: [self error: 'Carrito inexistente' ]."
-
-	(openCarts at: aCartId ) add: 1 of: aBook.! !
 
 !RestInterface methodsFor: 'public protocol' stamp: 'mc 11/28/2018 00:49:21'!
 createCartFor: aClient withPassword: aPassword
@@ -780,6 +825,11 @@ list: aCartId
 !classDefinition: 'RestInterface class' category: #TusLibros!
 RestInterface class
 	instanceVariableNames: ''!
+
+!RestInterface class methodsFor: 'error message' stamp: 'mc 12/2/2018 11:45:47'!
+invalidCartId
+
+	  ^'El ID de carrito no es valido'.! !
 
 !RestInterface class methodsFor: 'error message' stamp: 'mc 11/25/2018 20:20:39'!
 invalidUserOrPassword
