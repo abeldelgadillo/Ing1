@@ -97,27 +97,6 @@ setUp
 
 	testObjectsFactory := StoreTestObjectsFactory new.! !
 
-
-!CartTest methodsFor: 'support' stamp: 'HernanWilkinson 6/17/2013 17:48'!
-createCart
-	
-	^Cart acceptingItemsOf: self defaultCatalog! !
-
-!CartTest methodsFor: 'support' stamp: 'HernanWilkinson 6/17/2013 17:43'!
-defaultCatalog
-	
-	^ Array with: self itemSellByTheStore! !
-
-!CartTest methodsFor: 'support' stamp: 'HernanWilkinson 6/17/2013 17:44'!
-itemNotSellByTheStore
-	
-	^'invalidBook'! !
-
-!CartTest methodsFor: 'support' stamp: 'HernanWilkinson 6/17/2013 17:43'!
-itemSellByTheStore
-	
-	^ 'validBook'! !
-
 
 !classDefinition: #CashierTest category: #TusLibros!
 TestCase subclass: #CashierTest
@@ -266,132 +245,26 @@ debit: anAmount from: aCreditCard
 
 	^debitBehavior value: anAmount value: aCreditCard ! !
 
-
-!CashierTest methodsFor: 'setUp' stamp: 'A 11/15/2018 19:15:35'!
-createCart
-
-	^Cart acceptingItemsOf: #('libro valido' 'otro libro valido').
-! !
-
-!CashierTest methodsFor: 'setUp' stamp: 'A 11/15/2018 20:37:51'!
-creditCard
-
-	^'tarjeta de credito'! !
-
-!CashierTest methodsFor: 'setUp' stamp: 'A 11/15/2018 19:11:09'!
-priceList
-
-	|priceList|
-
-	priceList := Dictionary new.
-	priceList add: ('libro valido' -> 10).	
-	priceList add: ('otro libro valido' -> 5).
-	^priceList.! !
-
-
-!CashierTest methodsFor: 'test' stamp: 'A 11/15/2018 20:27:55'!
-test01TryToCheckoutAnEmptyCartShouldThrowAnError
-
-	"Checkoutear un carrtio vacío tira error"
-
-	|cashier cart|
-	
-	cashier := Cashier withPriceList: self priceList.
-	
-	cart := Cart acceptingItemsOf: #().
-
-	self 
-		should:[cashier checkout: cart]
-		raise: Error
-		withExceptionDo: [:error|
-			self assert: error messageText = 'carrito vacio'.
-			].
-
-	self assert: 0 equals: cashier sales.! !
-
-!CashierTest methodsFor: 'test' stamp: 'A 11/15/2018 20:29:31'!
-test02CheckOutOfACartWithOnlyABookShouldReturnTheValueOfTheBook
-
-	"Checkoutear un carrtio con un solo item"
-
-	|cashier cart|
-	
-	cashier := Cashier withPriceList: self priceList.
-	
-	cart := Cart acceptingItemsOf: #('libro valido').
-	cart add: 'libro valido'.
-
-	self assert: (cashier checkout: cart) equals: 10.
-	self assert: cashier sales equals: 1.! !
-
-!CashierTest methodsFor: 'test' stamp: 'A 11/15/2018 19:35:11'!
-test03aCheckoutOfACartWithMultipleBooksShouldReturnTheSumOfValues
-
-	"Checkoutear un carrtio con muchos items"
-
-	|cashier cart|
-	
-	cashier := Cashier withPriceList: self priceList.
-	
-	cart := Cart acceptingItemsOf: #('libro valido').
-	cart add: 2 of: 'libro valido'.
-
-	self assert: (cashier checkout: cart) equals: 20.! !
-
-!CashierTest methodsFor: 'test' stamp: 'A 11/15/2018 19:35:41'!
-test03bCheckoutOfACartWithDifferentBooksShouldReturnTheSumOfValues
-
-	"Checkoutear un carrtio con muchos items distintos"
-
-	|cashier cart |
-	
-	
-	cashier := Cashier withPriceList: self priceList.
-	
-	cart := self createCart.
-	cart add: 2 of: 'libro valido'.
-	cart add: 1 of: 'otro libro valido'.
-
-	self assert: (cashier checkout: cart) equals: 25.! !
-
-!CashierTest methodsFor: 'test' stamp: 'A 11/15/2018 20:43:44'!
-test04cantCheckoutWithExpiredCreditCard
-
-	|cashier cart creditCard|
-	
-	creditCard := self creditCard.
-	cashier := Cashier withPriceList: self priceList.
-	
-	cart := self createCart.
-	cart add: 2 of: 'libro valido'.
-	cart add: 1 of: 'otro libro valido'.
-
-	self 
-		should:[cashier checkout: cart chargingTo: creditCard]
-		raise: Error
-		withExceptionDo: [:error|
-			self assert: error messageText = 'tarjeta vencida'.
-			].
-
-	self assert: cashier sales equals: 0.! !
-
 
 !classDefinition: #RestInterfaceTest category: #TusLibros!
 TestCase subclass: #RestInterfaceTest
-	instanceVariableNames: 'testObjectsFactory debitBehavior'
+	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!RestInterfaceTest methodsFor: 'test' stamp: 'mc 11/27/2018 22:31:03'!
+!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/2/2018 17:37:50'!
 test01CreateACartForInvalidClientOrPasswordShouldRaiseError
 
-	| aRestInterface noExistenClient clientPassword existenClient |
+	| aRestInterface noExistenClient clientPassword existenClient catalog clientList |
 	
 	existenClient _ 1.
 	noExistenClient _ 2.
 	clientPassword _ '123'.
-	aRestInterface  _ RestInterface with: (Dictionary new at: existenClient put:clientPassword; yourself ).
+	
+	clientList _ Dictionary new at: existenClient put:clientPassword; yourself.
+	catalog _ StoreTestObjectsFactory new defaultCatalog.
+	aRestInterface  _ RestInterface with: clientList and: catalog.
 	
 	self should: [ aRestInterface createCartFor:noExistenClient withPassword: clientPassword] 
 		raise: Error
@@ -405,44 +278,48 @@ test01CreateACartForInvalidClientOrPasswordShouldRaiseError
 		raise: Error
 		withExceptionDo:[ :anError | self assert: anError messageText = RestInterface invalidUserOrPassword].! !
 
-!RestInterfaceTest methodsFor: 'test' stamp: 'mc 11/27/2018 22:16:49'!
+!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/2/2018 17:13:14'!
 test02CreateACartForAValidClientAndPasswordShouldCreateAnEmptyCart
 
-	| client clientPassword restInterface cartId |
+	| clientPassword restInterface cartId catalog clientList existenClient |
 	
-	client _ 1.
+	existenClient _ 1.
 	clientPassword _ '123'.
-	restInterface  _ RestInterface with: (Dictionary new at: client put:clientPassword; yourself ).
+		clientList _ Dictionary new at: existenClient put:clientPassword; yourself.
+	catalog _ StoreTestObjectsFactory new defaultCatalog.
+	restInterface  _ RestInterface with: clientList and: catalog.
 	
-	cartId _  restInterface createCartFor:client withPassword: clientPassword.
+	cartId _  restInterface createCartFor:existenClient withPassword: clientPassword.
 	
 	self assert: OrderedCollection new equals: (restInterface list: cartId) .! !
 
-!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/2/2018 11:46:10'!
+!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/2/2018 17:39:45'!
 test03AddToCartAnInexistentCartShouldThrowError
 
-	| client clientPassword restInterface |
+	| client clientPassword restInterface catalog clientList |
 	
 	client _ 1.
 	clientPassword _ '123'.
-	
-	restInterface  _ RestInterface with: (Dictionary new at: client put:clientPassword; yourself ). 
+	clientList _ Dictionary new at: client put:clientPassword; yourself.
+	catalog _ StoreTestObjectsFactory new defaultCatalog.
+	restInterface  _ RestInterface with: clientList and: catalog.
 	
 	self should: [ restInterface add:1 of:'INVALID BOOK' to: 666.] 
 		raise: Error
 		withExceptionDo:[ :anError | self assert: anError messageText = RestInterface invalidCartId ].! !
 
-!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/2/2018 11:47:46'!
+!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/2/2018 17:40:21'!
 test04AddAnInvalidBookToCartShouldThrowError
 
 
-	| client clientPassword restInterface cartId invalidBook |
+	| client clientPassword restInterface cartId invalidBook catalog clientList |
 	
 	client _ 1.
 	clientPassword _ '123'.
 	invalidBook _ StoreTestObjectsFactory new itemNotSellByTheStore.
-	
-	restInterface  _ RestInterface with: (Dictionary new at: client put:clientPassword; yourself ). 
+	clientList _ Dictionary new at: client put:clientPassword; yourself.
+	catalog _ StoreTestObjectsFactory new defaultCatalog.
+	restInterface  _ RestInterface with: clientList and: catalog.
 	
 	cartId _ restInterface createCartFor:client withPassword: clientPassword.
 
@@ -451,17 +328,18 @@ test04AddAnInvalidBookToCartShouldThrowError
 		withExceptionDo: [:anError | self assert: anError messageText = Cart  new invalidItemErrorMessage]
 ! !
 
-!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/1/2018 17:13:02'!
+!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/2/2018 17:41:53'!
 test05AddAnInvalidQunatityOfBooksToCartShouldThrowError
 
 
-	| client clientPassword restInterface validBook cartId |
+	| client clientPassword restInterface validBook cartId catalog clientList |
 	
 	client _ 1.
 	clientPassword _ '123'.
 	validBook _ StoreTestObjectsFactory new itemSellByTheStore.
-	
-	restInterface  _ RestInterface with: (Dictionary new at: client put:clientPassword; yourself ). 
+	clientList _ Dictionary new at: client put:clientPassword; yourself.
+	catalog _ StoreTestObjectsFactory new defaultCatalog.
+	restInterface  _ RestInterface with: clientList and: catalog.
 	
 	cartId _ restInterface createCartFor:client withPassword: clientPassword.
 	
@@ -470,18 +348,19 @@ test05AddAnInvalidQunatityOfBooksToCartShouldThrowError
 		withExceptionDo: [:anError | self assert: anError messageText = Cart  new invalidQuantityErrorMessage]
 ! !
 
-!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/1/2018 17:25:20'!
+!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/2/2018 17:42:16'!
 test06AddValidBooksToACartShouldMakeThemAppearOnTheCartList
 
 	"Agregar libros al carrito es correcto o se hace correctamente"
 
-	| client clientPassword restInterface validBook cartId |
+	| client clientPassword restInterface validBook cartId catalog clientList |
 	
 	client _ 1.
 	clientPassword _ '123'.
 	validBook _ StoreTestObjectsFactory new itemSellByTheStore.
-	
-	restInterface  _ RestInterface with: (Dictionary new at: client put:clientPassword; yourself ).	
+	clientList _ Dictionary new at: client put:clientPassword; yourself.
+	catalog _ StoreTestObjectsFactory new defaultCatalog.
+	restInterface  _ RestInterface with: clientList and: catalog.	
 	cartId _ restInterface createCartFor:client withPassword: clientPassword.
 
 	self assert: 0 equals: (restInterface list: cartId) size.
@@ -493,30 +372,33 @@ test06AddValidBooksToACartShouldMakeThemAppearOnTheCartList
 	self assert: 2 equals: ( (restInterface list: cartId) occurrencesOf: validBook ).
 ! !
 
-!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/2/2018 12:02:02'!
+!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/2/2018 17:42:35'!
 test07ListAnInvalidCartShouldThrowInvalidCartIdError
 
-	| client clientPassword restInterface |
+	| client clientPassword restInterface catalog clientList |
 
 	client _ 1.
 	clientPassword _ '123'.
-		
-	restInterface  _ RestInterface with: (Dictionary new at: client put:clientPassword; yourself ).	
+	clientList _ Dictionary new at: client put:clientPassword; yourself.
+	catalog _ StoreTestObjectsFactory new defaultCatalog.
+	restInterface  _ RestInterface with: clientList and: catalog.	
 	
 	self should: [restInterface list: 666]
 		raise: Error
 		withExceptionDo:[ :anError | self assert: anError messageText = RestInterface invalidCartId ].! !
 
-!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/1/2018 17:46:03'!
+!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/2/2018 17:43:07'!
 test08ListACartDoesNotContainsNotAddedBooks
 
-	| client clientPassword restInterface cartId invalidBook validBook |
+	| client clientPassword restInterface cartId invalidBook validBook catalog clientList |
 
 	client _ 1.
 	clientPassword _ '123'.
 	validBook _ StoreTestObjectsFactory new itemSellByTheStore.
 	invalidBook _ StoreTestObjectsFactory new itemNotSellByTheStore.
-	restInterface  _ RestInterface with: (Dictionary new at: client put:clientPassword; yourself ).	
+	clientList _ Dictionary new at: client put:clientPassword; yourself.
+	catalog _ StoreTestObjectsFactory new defaultCatalog.
+	restInterface  _ RestInterface with: clientList and: catalog.	
 	cartId _ restInterface createCartFor:client withPassword: clientPassword.	
 	
 	restInterface add: 2 of: validBook to: cartId.
@@ -524,6 +406,42 @@ test08ListACartDoesNotContainsNotAddedBooks
 	self assert: 0 equals: ( (restInterface list: cartId) occurrencesOf: invalidBook ).
 	
 	! !
+
+!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/2/2018 17:43:29'!
+test09CheckoutOfAnNonExistentCartShouldThrowError
+
+	| client clientPassword restInterface validDate catalog clientList |
+
+	client _ 1.
+	clientPassword _ '123'.
+	validDate _ (Month month: (DateAndTime now) monthIndex year: (DateAndTime now) yearNumber + 1).
+	clientList _ Dictionary new at: client put:clientPassword; yourself.
+	catalog _ StoreTestObjectsFactory new defaultCatalog.
+	restInterface  _ RestInterface with: clientList and: catalog.	
+	
+	self should: [restInterface checkout: 666 chargingTo: 4929060755662917 expiringOn: validDate
+		withOwner: 'Willie Nelson'.] 
+		raise:  Error
+		withExceptionDo:[ :anError | self assert: anError messageText = RestInterface invalidCartId ].! !
+
+!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/2/2018 18:26:33'!
+test10CheckoutOfAnEmptyCartShouldThrowError
+
+	| client clientPassword restInterface validDate catalog clientList cartId |
+
+	client _ 1.
+	clientPassword _ '123'.
+	validDate _ (Month month: (DateAndTime now) monthIndex year: (DateAndTime now) yearNumber + 1).
+	clientList _ Dictionary new at: client put:clientPassword; yourself.
+	catalog _ StoreTestObjectsFactory new defaultCatalog.
+	restInterface  _ RestInterface with: clientList and: catalog.
+	
+	cartId _ restInterface createCartFor:client withPassword: clientPassword.	
+	
+	self should: [restInterface checkout: cartId chargingTo: 4929060755662917 expiringOn: validDate
+		withOwner: 'Willie Nelson'.] 
+		raise:  Error
+		withExceptionDo:[ :anError | self assert: anError messageText = Cashier cartCanNotBeEmptyErrorMessage ].! !
 
 
 !classDefinition: #Cart category: #TusLibros!
@@ -599,9 +517,10 @@ add: aQuantity of: anItem
 	1 to: aQuantity do: [ :aNumber | items add: anItem ]! !
 
 
-!Cart methodsFor: 'as yet unclassified' stamp: 'A 11/15/2018 18:54:14'!
-listOfItems
-	^items! !
+!Cart methodsFor: 'as yet unclassified' stamp: 'mc 12/2/2018 17:38:34'!
+listItems
+
+	^ items copy.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -664,35 +583,6 @@ initializeToCheckout: aCart charging: aCreditCard throught: aMerchantProcessor r
 	merchantProcessor := aMerchantProcessor.
 	salesBook := aSalesBook! !
 
-
-!Cashier methodsFor: 'as yet unclassified' stamp: 'A 11/15/2018 21:05:48'!
-checkout: aCart 
-	aCart isEmpty ifTrue: [self error: 'carrito vacio'].
-	sales := sales +1.
-	^aCart sumarize.
-	
-	"^(aCart listOfItems) inject: 0 into: [:sum :item | sum + (self priceOf: item)]."! !
-
-!Cashier methodsFor: 'as yet unclassified' stamp: 'A 11/15/2018 20:44:22'!
-checkout: aCart chargingTo: aString 
-
-	self error: 'tarjeta vencida'.! !
-
-!Cashier methodsFor: 'as yet unclassified' stamp: 'A 11/15/2018 20:31:19'!
-initializeWith: aDictionary 
-
-	priceList := aDictionary .
-	sales := 0.! !
-
-!Cashier methodsFor: 'as yet unclassified' stamp: 'A 11/15/2018 18:57:17'!
-priceOf: aBook
-
-	^priceList at: aBook.! !
-
-!Cashier methodsFor: 'as yet unclassified' stamp: 'A 11/15/2018 20:30:28'!
-sales
-	^sales.! !
-
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'Cashier class' category: #TusLibros!
@@ -734,12 +624,6 @@ creditCardHasNoCreditErrorMessage
 	
 	^'Credit card has no credit'! !
 
-
-!Cashier class methodsFor: 'as yet unclassified' stamp: 'A 11/15/2018 19:08:40'!
-withPriceList: aPriceList 
-	
-	^self new initializeWith: aPriceList .! !
-
 
 !classDefinition: #CreditCard category: #TusLibros!
 Object subclass: #CreditCard
@@ -773,15 +657,16 @@ expiringOn: aMonth
 
 !classDefinition: #RestInterface category: #TusLibros!
 Object subclass: #RestInterface
-	instanceVariableNames: 'clients openCarts lastId'
+	instanceVariableNames: 'clients openCarts lastId catalog'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!RestInterface methodsFor: 'initialization' stamp: 'mc 11/27/2018 22:22:28'!
-initializeWith: aDictionary 
+!RestInterface methodsFor: 'initialization' stamp: 'mc 12/2/2018 17:08:04'!
+initializeWith: aClientList and: aCatalog
 	
-	clients _ aDictionary.
+	clients _ aClientList.
+	catalog _ aCatalog .
 	
 	openCarts _ Dictionary new.
 	
@@ -801,10 +686,21 @@ add: aQuantity of: aBook to: aCartId
 	self assertValidCartId: aCartId.
 	(openCarts at: aCartId) add: aQuantity of: aBook.! !
 
-!RestInterface methodsFor: 'public protocol' stamp: 'mc 12/2/2018 12:12:51'!
-assertValidCartId: aCartId
- 
-	openCarts at: aCartId  ifAbsent: [self error: self class invalidCartId].! !
+!RestInterface methodsFor: 'public protocol' stamp: 'mc 12/2/2018 18:48:05'!
+checkout: aCartId chargingTo: aCreditCardNumber expiringOn: aDate withOwner: aName
+
+	| cart  creditCard aMerchantProcessor aSalesBook |
+	
+	self assertValidCartId: aCartId .
+	
+	cart _ openCarts at: aCartId .
+	creditCard _ CreditCard expiringOn: aDate. 
+	
+	"explicit set to nil to later set correctly"
+	aMerchantProcessor _ nil.
+	aSalesBook _ nil.
+	
+	^ Cashier toCheckout: cart charging: creditCard throught: aMerchantProcessor on: (DateAndTime now) registeringOn: aSalesBook.! !
 
 !RestInterface methodsFor: 'public protocol' stamp: 'mc 11/28/2018 00:49:21'!
 createCartFor: aClient withPassword: aPassword
@@ -820,11 +716,17 @@ createCartFor: aClient withPassword: aPassword
 	
 	^ lastId.! !
 
-!RestInterface methodsFor: 'public protocol' stamp: 'mc 12/2/2018 12:14:01'!
+!RestInterface methodsFor: 'public protocol' stamp: 'mc 12/2/2018 17:39:04'!
 list: aCartId
  
 	self assertValidCartId: aCartId .
-	^(openCarts at: aCartId) listOfItems.! !
+	^(openCarts at: aCartId) listItems.! !
+
+
+!RestInterface methodsFor: 'private' stamp: 'mc 12/2/2018 18:32:36'!
+assertValidCartId: aCartId
+ 
+	 openCarts at: aCartId  ifAbsent: [self error: self class invalidCartId].! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -847,6 +749,11 @@ invalidUserOrPassword
 with: aDictionary
 	
 	^ self new initializeWith: aDictionary .! !
+
+!RestInterface class methodsFor: 'instance creation' stamp: 'mc 12/2/2018 17:10:35'!
+with: aClientList and: aCatalog
+	
+	^ self new initializeWith: aClientList and: aCatalog .! !
 
 
 !classDefinition: #Sale category: #TusLibros!
