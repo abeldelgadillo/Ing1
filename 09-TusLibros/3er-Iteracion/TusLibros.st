@@ -493,8 +493,8 @@ test06AddValidBooksToACartShouldMakeThemAppearOnTheCartList
 	self assert: 2 equals: ( (restInterface list: cartId) occurrencesOf: validBook ).
 ! !
 
-!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/1/2018 17:35:19'!
-test07ListAnInvalidCartShouldThrowAnError
+!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/2/2018 12:02:02'!
+test07ListAnInvalidCartShouldThrowInvalidCartIdError
 
 	| client clientPassword restInterface |
 
@@ -504,7 +504,8 @@ test07ListAnInvalidCartShouldThrowAnError
 	restInterface  _ RestInterface with: (Dictionary new at: client put:clientPassword; yourself ).	
 	
 	self should: [restInterface list: 666]
-		raise: Error! !
+		raise: Error
+		withExceptionDo:[ :anError | self assert: anError messageText = RestInterface invalidCartId ].! !
 
 !RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/1/2018 17:46:03'!
 test08ListACartDoesNotContainsNotAddedBooks
@@ -772,7 +773,7 @@ expiringOn: aMonth
 
 !classDefinition: #RestInterface category: #TusLibros!
 Object subclass: #RestInterface
-	instanceVariableNames: 'testObjectsFactory debitBehavior clients openCarts lastId'
+	instanceVariableNames: 'clients openCarts lastId'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
@@ -794,12 +795,16 @@ cartFor: aClientId
 	^ (openCarts at: aClientId) copy.! !
 
 
-!RestInterface methodsFor: 'public protocol' stamp: 'mc 12/2/2018 11:45:37'!
-add: aQuantity of: aBook to: aUser
+!RestInterface methodsFor: 'public protocol' stamp: 'mc 12/2/2018 12:13:06'!
+add: aQuantity of: aBook to: aCartId
 
-	(clients keys includes: aUser) not ifTrue: [self error: self class invalidCartId].
+	self assertValidCartId: aCartId.
+	(openCarts at: aCartId) add: aQuantity of: aBook.! !
 
-	(openCarts at: aUser) add: aQuantity of: aBook.! !
+!RestInterface methodsFor: 'public protocol' stamp: 'mc 12/2/2018 12:12:51'!
+assertValidCartId: aCartId
+ 
+	openCarts at: aCartId  ifAbsent: [self error: self class invalidCartId].! !
 
 !RestInterface methodsFor: 'public protocol' stamp: 'mc 11/28/2018 00:49:21'!
 createCartFor: aClient withPassword: aPassword
@@ -815,9 +820,10 @@ createCartFor: aClient withPassword: aPassword
 	
 	^ lastId.! !
 
-!RestInterface methodsFor: 'public protocol' stamp: 'A 11/26/2018 19:11:04'!
+!RestInterface methodsFor: 'public protocol' stamp: 'mc 12/2/2018 12:14:01'!
 list: aCartId
  
+	self assertValidCartId: aCartId .
 	^(openCarts at: aCartId) listOfItems.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
