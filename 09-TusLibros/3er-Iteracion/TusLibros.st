@@ -673,6 +673,31 @@ test19ListPurchaseForAClientShouldContainTheListOfPurchasedItems
 	self assert: (purchasedItems occurrencesOf: validBook ) equals: 1.
 	self assert: (purchasedItems occurrencesOf: otherValidBook ) equals: 1.! !
 
+!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/3/2018 17:06:32'!
+test20CantAddToBookAnExpiredCart
+
+	| client clientPassword restInterface validBook cartId catalog clientList aClock |
+	
+	client _ 1.
+	clientPassword _ '123'.
+	validBook _ StoreTestObjectsFactory new itemSellByTheStore.
+	clientList _ Dictionary new at: client put:clientPassword; yourself.
+	catalog _ StoreTestObjectsFactory new defaultCatalog.
+	restInterface  _ RestInterface with: clientList and: catalog.	
+	aClock _ ServerClock now.
+	restInterface  _ RestInterface with: clientList and: catalog using: self timingWith: aClock.
+	
+	cartId _ restInterface createCartFor:client withPassword: clientPassword.
+	
+	self assert: 0 equals: (restInterface listCart: cartId) size.
+	self assert: 0 equals: ( (restInterface listCart: cartId) occurrencesOf: validBook ).
+
+	restInterface add: 2 of: validBook to: cartId.
+	
+	self assert: 2 equals: (restInterface listCart: cartId) size.
+	self assert: 2 equals: ( (restInterface listCart: cartId) occurrencesOf: validBook ).
+! !
+
 
 !RestInterfaceTest methodsFor: 'as yet unclassified' stamp: 'mc 12/2/2018 23:53:38'!
 debit: anAmount from: aCreditCard 
@@ -933,7 +958,7 @@ expiringOn: aMonth for: aName with: aNumber
 
 !classDefinition: #RestInterface category: #TusLibros!
 Object subclass: #RestInterface
-	instanceVariableNames: 'clients openCarts lastId catalog merchantProcessor salesBook cartOwner salesByClient'
+	instanceVariableNames: 'clients openCarts lastId catalog merchantProcessor salesBook cartOwner salesByClient serverClock cartSession'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
@@ -943,7 +968,7 @@ initializeWith: aClientList and: aCatalog
 	
 	self initializeWith: aClientList and: aCatalog chargingThrought: nil .! !
 
-!RestInterface methodsFor: 'initialization' stamp: 'mc 12/3/2018 06:58:08'!
+!RestInterface methodsFor: 'initialization' stamp: 'mc 12/3/2018 15:33:02'!
 initializeWith: aClientList and: aCatalog chargingThrought: aMerchantProcessor .
 	
 	
@@ -955,28 +980,44 @@ initializeWith: aClientList and: aCatalog chargingThrought: aMerchantProcessor .
 	salesBook _ OrderedCollection new.	
 	cartOwner _ Dictionary new.	
 	salesByClient _ Dictionary new.
+	lastId _ 0.
 	
-	lastId _ 0.! !
+	serverClock _ ServerClock now.! !
 
-
-!RestInterface methodsFor: 'accessing' stamp: 'mc 11/25/2018 21:18:34'!
-cartFor: aClientId
+!RestInterface methodsFor: 'initialization' stamp: 'mc 12/3/2018 17:10:57'!
+initializeWith: aClientList and: aCatalog chargingThrought: aMerchantProcessor startingAt: aServerClock.
 	
-	^ (openCarts at: aClientId) copy.! !
+	
+	clients _ aClientList.
+	catalog _ aCatalog .
+	
+	openCarts _ Dictionary new.
+	merchantProcessor _ aMerchantProcessor .
+	salesBook _ OrderedCollection new.	
+	cartOwner _ Dictionary new.	
+	salesByClient _ Dictionary new.
+	cartSession _ Dictionary new.
+	
+	lastId _ 0.
+	
+	serverClock _ aServerClock .! !
 
 
-!RestInterface methodsFor: 'public protocol' stamp: 'mc 12/2/2018 12:13:06'!
+!RestInterface methodsFor: 'public protocol' stamp: 'mc 12/3/2018 16:25:16'!
 add: aQuantity of: aBook to: aCartId
 
+	
 	self assertValidCartId: aCartId.
+	self assertNotExpiredSession: aCartId.
 	(openCarts at: aCartId) add: aQuantity of: aBook.! !
 
-!RestInterface methodsFor: 'public protocol' stamp: 'mc 12/3/2018 07:06:55'!
+!RestInterface methodsFor: 'public protocol' stamp: 'mc 12/3/2018 16:59:00'!
 checkout: aCartId chargingTo: aCreditCardNumber expiringOn: aDate withOwner: aName
 
 	| cart  creditCard cashier saleTotal clientId salesList |
 	
 	self assertValidCartId: aCartId .
+		self assertNotExpiredSession: aCartId.
 	
 	cart _ openCarts at: aCartId .
 	creditCard _ CreditCard expiringOn: aDate for: aName with: aCreditCardNumber.
@@ -992,7 +1033,7 @@ checkout: aCartId chargingTo: aCreditCardNumber expiringOn: aDate withOwner: aNa
 		
 	^ saleTotal.! !
 
-!RestInterface methodsFor: 'public protocol' stamp: 'mc 12/3/2018 07:23:54'!
+!RestInterface methodsFor: 'public protocol' stamp: 'mc 12/3/2018 16:14:07'!
 createCartFor: aClientId withPassword: aPassword
 
 	"validate user and password "
@@ -1006,13 +1047,15 @@ createCartFor: aClientId withPassword: aPassword
 	
 	cartOwner at: lastId put: aClientId .
 	openCarts at: lastId put: (Cart acceptingItemsOf: catalog) .
+	cartSession at: lastId put: DateAndTime now. 
 	
 	^ lastId.! !
 
-!RestInterface methodsFor: 'public protocol' stamp: 'mc 12/3/2018 05:58:05'!
+!RestInterface methodsFor: 'public protocol' stamp: 'mc 12/3/2018 16:59:44'!
 listCart: aCartId
  
 	self assertValidCartId: aCartId .
+	self assertNotExpiredSession: aCartId.
 	^(openCarts at: aCartId) listItems.! !
 
 !RestInterface methodsFor: 'public protocol' stamp: 'mc 12/3/2018 07:24:13'!
@@ -1033,6 +1076,19 @@ invalidUserOrPassword
 	  ^'Usuario o Password invalido'.! !
 
 
+!RestInterface methodsFor: 'private' stamp: 'mc 12/3/2018 16:56:04'!
+assertNotExpiredSession: aCartId
+ 
+	 | lastUpdatedTime currentTime passTime | 
+	  
+	lastUpdatedTime _ cartSession at: aCartId .
+	
+	currentTime _ serverClock time.
+	
+	passTime  _ (currentTime  - lastUpdatedTime ). 
+
+	passTime > 0 minutes and:[passTime < 30 minutes].! !
+
 !RestInterface methodsFor: 'private' stamp: 'mc 12/3/2018 05:47:58'!
 assertValidCartId: aCartId
  
@@ -1051,7 +1107,6 @@ assertValidUser: aClientId andPassword: aPassword
 RestInterface class
 	instanceVariableNames: ''!
 
-
 !RestInterface class methodsFor: 'instance creation' stamp: 'mc 12/2/2018 17:10:35'!
 with: aClientList and: aCatalog
 	
@@ -1061,6 +1116,11 @@ with: aClientList and: aCatalog
 with: aClientList and: aCatalog using: aMerchantProcessor 
 	
 	^ self new initializeWith: aClientList and: aCatalog chargingThrought: aMerchantProcessor .! !
+
+!RestInterface class methodsFor: 'instance creation' stamp: 'mc 12/3/2018 17:04:20'!
+with: aClientList and: aCatalog using: aMerchantProcessor timingWith: aServerClock
+	
+	^ self new initializeWith: aClientList and: aCatalog chargingThrought: aMerchantProcessor startingAt: aServerClock.! !
 
 
 !classDefinition: #Sale category: #TusLibros!
@@ -1109,6 +1169,49 @@ of: aTotal with: aItemList
 
 	"should assert total is not negative or 0!!"
 	^self new initializeTotal: aTotal  and:aItemList.! !
+
+
+!classDefinition: #ServerClock category: #TusLibros!
+Object subclass: #ServerClock
+	instanceVariableNames: 'time'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!ServerClock methodsFor: 'initialization' stamp: 'mc 12/3/2018 15:49:41'!
+advance: aDuration
+
+	"assert que me estan mandando una duration"
+	time _ time + aDuration .! !
+
+!ServerClock methodsFor: 'initialization' stamp: 'mc 12/3/2018 15:35:44'!
+initializeAt: aDateAndTime 
+	
+	time _ aDateAndTime .! !
+
+!ServerClock methodsFor: 'initialization' stamp: 'mc 12/3/2018 16:02:04'!
+regress: aDuration
+
+	"assert que me estan mandando una duration"
+	time _ time - aDuration .! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'ServerClock class' category: #TusLibros!
+ServerClock class
+	instanceVariableNames: ''!
+
+!ServerClock class methodsFor: 'instance creation' stamp: 'mc 12/3/2018 15:32:10'!
+now
+
+	" talvez se deba agregar una validacion de que lo que se pase sea una fecha... "
+	^self startingAt: DateAndTime now.! !
+
+!ServerClock class methodsFor: 'instance creation' stamp: 'mc 12/3/2018 15:30:18'!
+startingAt: aDate
+
+	" talvez se deba agregar una validacion de que lo que se pase sea una fecha... "
+	^self new initializeAt: aDate.! !
 
 
 !classDefinition: #StoreTestObjectsFactory category: #TusLibros!
