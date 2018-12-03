@@ -443,6 +443,75 @@ test10CheckoutOfAnEmptyCartShouldThrowError
 		raise:  Error
 		withExceptionDo:[ :anError | self assert: anError messageText = Cashier cartCanNotBeEmptyErrorMessage ].! !
 
+!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/2/2018 20:51:35'!
+test11CheckoutWithAnExpiredCreditCardShouldThrowError
+
+	| client clientPassword restInterface catalog clientList cartId validBook expiredDate |
+
+	client _ 1.
+	clientPassword _ '123'.
+	expiredDate _ (Month month: (DateAndTime now) monthIndex year: (DateAndTime now) yearNumber - 1).
+	clientList _ Dictionary new at: client put:clientPassword; yourself.
+	catalog _ StoreTestObjectsFactory new defaultCatalog.
+	restInterface  _ RestInterface with: clientList and: catalog.
+	
+	
+	cartId _ restInterface createCartFor:client withPassword: clientPassword.	
+	
+	validBook _ StoreTestObjectsFactory new itemSellByTheStore.
+	restInterface add: 2 of: validBook to: cartId.
+	
+	self should: [restInterface checkout: cartId chargingTo: 4929060755662917 expiringOn: expiredDate
+		withOwner: '1'.] 
+		raise:  Error
+		withExceptionDo:[ :anError | self assert: anError messageText = Cashier canNotChargeAnExpiredCreditCardErrorMessage ].! !
+
+!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/2/2018 20:42:31'!
+test12CheckoutWithInvalidOwnerForACreditCardShouldThrowError
+
+	| client clientPassword restInterface catalog clientList cartId validBook validDate |
+
+	client _ 1.
+	clientPassword _ '123'.
+	validDate _ (Month month: (DateAndTime now) monthIndex year: (DateAndTime now) yearNumber + 1).
+	clientList _ Dictionary new at: client put:clientPassword; yourself.
+	catalog _ StoreTestObjectsFactory new defaultCatalog.
+	restInterface  _ RestInterface with: clientList and: catalog.
+	
+	
+	cartId _ restInterface createCartFor:client withPassword: clientPassword.	
+	
+	validBook _ StoreTestObjectsFactory new itemSellByTheStore.
+	restInterface add: 2 of: validBook to: cartId.
+	
+	self should: [restInterface checkout: cartId chargingTo: 4929060755662917 expiringOn: validDate
+		withOwner: ''.] 
+		raise:  Error
+		withExceptionDo:[ :anError | self assert: anError messageText = Cashier invalidCreditCardOwnerErrorMessage ].! !
+
+!RestInterfaceTest methodsFor: 'test' stamp: 'mc 12/2/2018 20:51:10'!
+test13CheckoutWithInvalidNumberForACreditCardShouldThrowError
+
+	| client clientPassword restInterface catalog clientList cartId validBook validDate |
+
+	client _ 1.
+	clientPassword _ '123'.
+	validDate _ (Month month: (DateAndTime now) monthIndex year: (DateAndTime now) yearNumber + 1).
+	clientList _ Dictionary new at: client put:clientPassword; yourself.
+	catalog _ StoreTestObjectsFactory new defaultCatalog.
+	restInterface  _ RestInterface with: clientList and: catalog.
+	
+	
+	cartId _ restInterface createCartFor:client withPassword: clientPassword.	
+	
+	validBook _ StoreTestObjectsFactory new itemSellByTheStore.
+	restInterface add: 2 of: validBook to: cartId.
+	
+	self should: [restInterface checkout: cartId chargingTo: 123456789012345 expiringOn: validDate
+		withOwner: '1'.] 
+		raise:  Error
+		withExceptionDo:[ :anError | self assert: anError messageText = Cashier invalidCreditCardNumberErrorMessage ].! !
+
 
 !classDefinition: #Cart category: #TusLibros!
 Object subclass: #Cart
@@ -599,13 +668,31 @@ assertIsNotExpired: aCreditCard on: aDate
 	
 	(aCreditCard isExpiredOn: aDate) ifTrue: [ self error: self canNotChargeAnExpiredCreditCardErrorMessage ]! !
 
+!Cashier class methodsFor: 'assertions' stamp: 'mc 12/2/2018 21:03:11'!
+assertIsValidCreditCardNumber: aCreditCard
+	
+	| number |
+	number  _ aCreditCard number.
+	(number notNil and:[number asString size  = 16]) ifFalse: [ self error: self invalidCreditCardNumberErrorMessage ]
+	
+	! !
 
-!Cashier class methodsFor: 'instance creation' stamp: 'HernanWilkinson 6/17/2013 18:51'!
+!Cashier class methodsFor: 'assertions' stamp: 'mc 12/2/2018 20:44:57'!
+assertIsValidCreditCardOwner: aCreditCard
+	
+	(aCreditCard owner = '' or:[ aCreditCard owner=nil]) ifTrue: [ self error: self invalidCreditCardOwnerErrorMessage ]
+	
+	! !
+
+
+!Cashier class methodsFor: 'instance creation' stamp: 'mc 12/2/2018 20:50:42'!
 toCheckout: aCart charging: aCreditCard throught: aMerchantProcessor on: aDate registeringOn: aSalesBook
 	
 	self assertIsNotEmpty: aCart.
 	self assertIsNotExpired: aCreditCard on: aDate.
-	
+	self assertIsValidCreditCardOwner: aCreditCard.
+	self assertIsValidCreditCardNumber: aCreditCard.
+
 	^self new initializeToCheckout: aCart charging: aCreditCard throught: aMerchantProcessor registeringOn: aSalesBook! !
 
 
@@ -624,10 +711,20 @@ creditCardHasNoCreditErrorMessage
 	
 	^'Credit card has no credit'! !
 
+!Cashier class methodsFor: 'error messages' stamp: 'mc 12/2/2018 20:44:02'!
+invalidCreditCardNumberErrorMessage
+	
+	^'Invalid credit card number'! !
+
+!Cashier class methodsFor: 'error messages' stamp: 'mc 12/2/2018 20:42:48'!
+invalidCreditCardOwnerErrorMessage
+	
+	^'Invalid name for credit card owner'! !
+
 
 !classDefinition: #CreditCard category: #TusLibros!
 Object subclass: #CreditCard
-	instanceVariableNames: 'expiration'
+	instanceVariableNames: 'expiration owner number'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
@@ -637,11 +734,23 @@ isExpiredOn: aDate
 	
 	^expiration start < (Month month: aDate monthIndex year: aDate yearNumber) start ! !
 
+!CreditCard methodsFor: 'testing' stamp: 'mc 12/2/2018 20:55:03'!
+number 
 
-!CreditCard methodsFor: 'initialization' stamp: 'HernanWilkinson 6/17/2013 18:38'!
-initializeExpiringOn: aMonth 
+	^number.! !
+
+!CreditCard methodsFor: 'testing' stamp: 'mc 12/2/2018 20:36:48'!
+owner 
 	
-	expiration := aMonth ! !
+	^owner.! !
+
+
+!CreditCard methodsFor: 'initialization' stamp: 'mc 12/2/2018 21:05:52'!
+initializeExpiringOn: aMonth for: aName with: aNumber
+	
+	expiration := aMonth .
+	owner _ aName .
+	number _ aNumber .! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -649,10 +758,10 @@ initializeExpiringOn: aMonth
 CreditCard class
 	instanceVariableNames: ''!
 
-!CreditCard class methodsFor: 'instance creation' stamp: 'HernanWilkinson 6/17/2013 18:38'!
-expiringOn: aMonth 
+!CreditCard class methodsFor: 'instance creation' stamp: 'mc 12/2/2018 21:06:31'!
+expiringOn: aMonth for: aName with: aNumber
 	
-	^self new initializeExpiringOn: aMonth! !
+	^self new initializeExpiringOn: aMonth for: aName  with: aNumber.! !
 
 
 !classDefinition: #RestInterface category: #TusLibros!
@@ -686,7 +795,7 @@ add: aQuantity of: aBook to: aCartId
 	self assertValidCartId: aCartId.
 	(openCarts at: aCartId) add: aQuantity of: aBook.! !
 
-!RestInterface methodsFor: 'public protocol' stamp: 'mc 12/2/2018 18:48:05'!
+!RestInterface methodsFor: 'public protocol' stamp: 'mc 12/2/2018 21:16:27'!
 checkout: aCartId chargingTo: aCreditCardNumber expiringOn: aDate withOwner: aName
 
 	| cart  creditCard aMerchantProcessor aSalesBook |
@@ -694,7 +803,7 @@ checkout: aCartId chargingTo: aCreditCardNumber expiringOn: aDate withOwner: aNa
 	self assertValidCartId: aCartId .
 	
 	cart _ openCarts at: aCartId .
-	creditCard _ CreditCard expiringOn: aDate. 
+	creditCard _ CreditCard expiringOn: aDate for: aName with: aCreditCardNumber.
 	
 	"explicit set to nil to later set correctly"
 	aMerchantProcessor _ nil.
@@ -823,15 +932,15 @@ defaultCatalog
 		yourself ! !
 
 
-!StoreTestObjectsFactory methodsFor: 'credit card' stamp: 'HernanWilkinson 6/17/2013 18:37'!
+!StoreTestObjectsFactory methodsFor: 'credit card' stamp: 'mc 12/2/2018 21:17:06'!
 expiredCreditCard
 	
-	^CreditCard expiringOn: (Month month: today monthIndex year: today yearNumber - 1)! !
+	^CreditCard expiringOn: (Month month: today monthIndex year: today yearNumber - 1) for: 'Client' with:1234567890123456! !
 
-!StoreTestObjectsFactory methodsFor: 'credit card' stamp: 'HernanWilkinson 6/17/2013 18:36'!
+!StoreTestObjectsFactory methodsFor: 'credit card' stamp: 'mc 12/2/2018 21:14:43'!
 notExpiredCreditCard
 	
-	^CreditCard expiringOn: (Month month: today monthIndex year: today yearNumber + 1)! !
+	^CreditCard expiringOn: (Month month: today monthIndex year: today yearNumber + 1) for:'Client' with:1234567890123456.! !
 
 
 !StoreTestObjectsFactory methodsFor: 'initialization' stamp: 'HernanWilkinson 6/17/2013 18:37'!
